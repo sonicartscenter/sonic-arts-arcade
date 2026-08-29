@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+
+<link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet">
+
+<style>
+body { font-family: 'Press Start 2P'; }
+
+.full-row { width:100%; margin-bottom:15px; }
+.button-row { display:flex; gap:10px; flex-wrap:wrap; }
+.jack { margin:4px; }
+
+.heart.is-empty, .trophy.is-empty { color:transparent; }
+</style>
+</head><body class="nes-body"><h2 class="nes-text is-primary">PATCH TRAINER</h2>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">SYSTEM HUD</p>
+<p>LIVES</p>
+<section><i id="h1" class="nes-icon heart"></i> <i id="h2" class="nes-icon heart"></i> <i id="h3" class="nes-icon heart"></i> <i id="h4" class="nes-icon heart"></i> <i id="h5" class="nes-icon heart"></i></section>
+<p>SCORE</p>
+<section><i id="t1" class="nes-icon trophy is-empty"></i> <i id="t2" class="nes-icon trophy is-empty"></i> <i id="t3" class="nes-icon trophy is-empty"></i> <i id="t4" class="nes-icon trophy is-empty"></i> <i id="t5" class="nes-icon trophy is-empty"></i> <i id="t6" class="nes-icon trophy is-empty"></i> <i id="t7" class="nes-icon trophy is-empty"></i> <i id="t8" class="nes-icon trophy is-empty"></i> <i id="t9" class="nes-icon trophy is-empty"></i> <i id="t10" class="nes-icon trophy is-empty"></i></section>
+<div class="button-row"><button class="nes-btn is-primary" onclick="check()">CHECK PATH</button> <button class="nes-btn is-error" onclick="manualReset()">RESET</button></div>
+<div id="popup" class="is-hidden">
+<div id="message" class="nes-balloon from-left"></div>
+</div>
+</div>
+<!-- GAME OVER -->
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p><dialog id="dialog-game-over" class="nes-dialog is-dark is-rounded"><form method="dialog">
+<p class="title" style="text-align: center;">GAME OVER</p>
+<menu class="dialog-menu" style="text-align: center;"><button class="nes-btn is-primary" onclick="restartGame()">TRY AGAIN</button></menu></form></dialog><p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<!-- WIN -->
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p><dialog id="dialog-win" class="nes-dialog is-dark is-rounded"><form method="dialog">
+<p class="title" style="text-align: center;">CONGRATULATIONS!</p>
+<p style="text-align: center;">YOU'VE COMPLETED THE PATCH TRAINER</p>
+<p id="finalScore" class="nes-text is-success" style="text-align: center;"></p>
+<p id="finalBreakdown" style="text-align: center;"></p>
+<menu class="dialog-menu" style="text-align: center;"><button class="nes-btn is-success" onclick="restartGame()">START AGAIN</button></menu></form></dialog><p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">ASSIGNMENT</p>
+<p id="assignmentText">Loading...</p>
+</div>
+<!-- MIC -->
+<div class="nes-container is-dark with-title full-row">
+<p class="title">MICROPHONE</p>
+<div class="button-row mic-group"><button class="nes-btn jack" onclick="setStage('mic',this,'sm58')">SM58</button> <button class="nes-btn jack" onclick="setStage('mic',this,'u87')">U87</button> <button class="nes-btn jack" onclick="setStage('mic',this,'414')">414</button> <button class="nes-btn jack" onclick="setStage('mic',this,'441')">441</button></div>
+</div>
+<!-- ROOM -->
+<div class="nes-container is-dark with-title full-row">
+<p class="title">STUDIO ROOM</p>
+<div class="button-row"><button class="nes-btn jack" onclick="setStage('room',this,'199')">199 Iso Booth</button> <button class="nes-btn jack" onclick="setStage('room',this,'190')">190 Ensemble Room</button> <button class="nes-btn jack" onclick="setStage('room',this,'95')">95 Recital Hall</button></div>
+</div>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">STUDIO IN</p>
+<div id="studio" class="button-row"></div>
+</div>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">PCC TIE LINES</p>
+<div class="nes-container is-dark with-title">
+<p class="title">FROM STUDIO</p>
+<div id="link" class="button-row"></div>
+</div>
+<div class="nes-container is-dark with-title">
+<p class="title">TO CONTROL ROOM</p>
+<div id="tie" class="button-row"></div>
+</div>
+</div>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">CONTROL ROOM PATCHBAY</p>
+<div id="patch" class="button-row"></div>
+</div>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">API PREAMPS CHANNEL #</p>
+<div id="apiChannel" class="button-row"></div>
+</div>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">YAMAHA O2R CHANNEL #</p>
+<div id="yamahaChannel" class="button-row"></div>
+</div>
+<div class="nes-container is-dark with-title full-row">
+<p class="title">LYNX AURORA / DAW INPUT</p>
+<div id="lynx" class="button-row"></div>
+</div>
+<p><script>
+
+/* ===== STATE ===== */
+let paths = {};
+let currentMic = null;
+let completedPaths = new Set();
+let micLynx = {};
+
+let life = 5;
+let score = 0;
+let questionsAsked = 0;
+
+/* ===== ASSIGNMENTS ===== */
+const assignments = [
+{
+text: "You're recording acoustic guitar and voice in the 199 ISO Booth using SM58 and 414. Route both through Yamaha.",
+room:"199",mics:["sm58","414"],console:"yamaha"
+},
+{
+text: "You're recording a string trio in 95 Recital Hall using 414, 441, U87. Use API.",
+room:"95",mics:["414","441","u87"],console:"api"
+},
+{
+text: "Voiceover in 199 ISO Booth with U87. Use Yamaha.",
+room:"199",mics:["u87"],console:"yamaha"
+},
+{
+text: "Horn trio in 199 ISO Booth. 414 + U87 = API, 441 = Yamaha.",
+room:"199",mics:["414","441","u87"],console:"mixed",
+api:["414","u87"],yamaha:["441"]
+},
+{
+text: "Singer-songwriter in 190. SM58 + U87 → API.",
+room:"190",mics:["sm58","u87"],console:"api"
+},
+{
+text: "Piano + room mic in 95. 414 + U87 → Yamaha.",
+room:"95",mics:["414","u87"],console:"yamaha"
+},
+{
+text: "Drum overhead + vocal in 190. 414 → API, SM58 → Yamaha.",
+room:"190",mics:["414","sm58"],console:"mixed",
+api:["414"],yamaha:["sm58"]
+},
+{
+text: "Brass soloist in 95 using 441 → API.",
+room:"95",mics:["441"],console:"api"
+},
+{
+text: "Podcast in 199 with SM58 + U87 → Yamaha.",
+room:"199",mics:["sm58","u87"],console:"yamaha"
+},
+{
+text: "Small ensemble in 190. 414 + 441 → API, SM58 → Yamaha.",
+room:"190",mics:["414","441","sm58"],console:"mixed",
+api:["414","441"],yamaha:["sm58"]
+}
+];
+
+let queue=[];
+let currentAssignment=null;
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+}
+
+function nextAssignment(){
+if(queue.length===0){
+queue=[...assignments];
+shuffle(queue);
+}
+currentAssignment=queue.pop();
+document.getElementById("assignmentText").innerText=currentAssignment.text;
+clearBoard();
+}
+
+/* ===== COLOR ===== */
+function getColor(mic){
+if(mic==="u87") return "is-warning";
+if(mic==="414") return "is-primary";
+if(mic==="441") return "is-error";
+return "is-success";
+}
+
+/* ===== BUTTON GENERATION ===== */
+function create(parent,stage,num,label=num){
+let btn=document.createElement("button");
+btn.className="nes-btn jack";
+btn.innerText=label;
+btn.onclick=()=>setStage(stage,btn,num);
+document.getElementById(parent).appendChild(btn);
+}
+
+for(let i=1;i<=32;i++){
+create("studio","studio",i);
+create("link","link",i);
+create("tie","tie",i);
+create("patch","patch",i);
+}
+
+for(let i=1;i<=16;i++){
+create("apiChannel","apiChannel",i,"Channel "+i);
+create("yamahaChannel","yamahaChannel",i,"Channel "+i);
+}
+
+for(let i=1;i<=32;i++){
+let label=i<=16 ? "A Line "+i : "AES "+(i-16)+"("+i+")";
+create("lynx","lynx",i,label);
+}
+
+/* ===== CORE ===== */
+
+function clearStageForMic(stage, mic){
+let color=getColor(mic);
+document.querySelectorAll(`#${{stage}} .jack`).forEach(b=>b.classList.remove(color));
+}
+
+function clearBoard(){
+document.querySelectorAll(".jack").forEach(b=>{
+b.classList.remove("is-success","is-warning","is-primary","is-error");
+});
+paths={};
+currentMic=null;
+}
+
+function renderMicState(mic){
+["apiChannel","yamahaChannel"].forEach(stage=>{
+  let color = getColor(mic);
+  document.querySelectorAll(`#${{stage}} .jack`).forEach(btn=>{
+    btn.classList.remove(color);
+  });
+});
+
+if(!paths[mic]) return;
+
+let p = paths[mic];
+let color = getColor(mic);
+
+if(p.apiChannel){
+document.getElementById("apiChannel").children[p.apiChannel-1].classList.add(color);
+}
+if(p.yamahaChannel){
+document.getElementById("yamahaChannel").children[p.yamahaChannel-1].classList.add(color);
+}
+}
+
+/* ✅ FIXED SETSTAGE */
+function setStage(stage, btn, value){
+
+if(stage==="patch") return;
+
+if(stage==="mic"){
+currentMic=value;
+
+if(!paths[currentMic]){
+paths[currentMic]={mic:value};
+}
+
+btn.classList.add(getColor(value));
+renderMicState(currentMic);
+return;
+}
+
+if(!currentMic) return;
+
+let p=paths[currentMic];
+
+if(stage === "room"){
+  document.querySelectorAll(".nes-container .jack").forEach(b=>{
+    if(
+      b.innerText === "199 Iso Booth" ||
+      b.innerText === "190 Ensemble Room" ||
+      b.innerText === "95 Recital Hall"
+    ){
+      b.classList.remove("is-success","is-warning","is-primary","is-error");
+    }
+  });
+}
+
+// ===== STUDIO INPUT (ONE ONLY) =====
+if(stage === "studio"){
+clearStageForMic("studio", currentMic);
+}
+if(stage === "tie"){
+  clearStageForMic("tie", currentMic);
+}
+// ===== LYNX (ONE ONLY PER MIC) =====
+if(stage === "lynx"){
+  clearStageForMic("lynx", currentMic);
+}
+if(stage==="apiChannel"){
+if(p.yamahaChannel){
+clearStageForMic("yamahaChannel",currentMic);
+delete p.yamahaChannel;
+}
+clearStageForMic("apiChannel",currentMic);
+}
+if(stage==="yamahaChannel"){
+if(p.apiChannel){
+clearStageForMic("apiChannel",currentMic);
+delete p.apiChannel;
+}
+clearStageForMic("yamahaChannel",currentMic);
+}
+
+btn.classList.add(getColor(currentMic));
+p[stage]=value;
+
+if(stage==="studio") auto("link",value);
+if(stage==="tie") auto("patch",value);
+}
+
+
+function auto(stage,value){
+// ✅ CLEAR previous auto-selection for this mic
+clearStageForMic(stage, currentMic);
+
+// ✅ APPLY new auto selection
+let btn=document.getElementById(stage).children[value-1];
+btn.classList.add(getColor(currentMic));
+paths[currentMic][stage]=value;
+}
+
+/* ===== VALIDATION ===== */
+
+function validateAssignment(){
+
+let errors = [];
+
+for(let m in paths){
+
+let p = paths[m];
+
+// ✅ Missing full chain
+if(!(p.mic && p.room && p.studio && p.link && p.tie && p.patch && p.lynx)){
+  errors.push(m.toUpperCase() + " → Incomplete path");
+  continue;
+}
+
+// ✅ Room check
+if(p.room !== currentAssignment.room){
+  errors.push(m.toUpperCase() + " → Wrong room");
+}
+
+// ✅ Mic required
+if(!currentAssignment.mics.includes(p.mic)){
+  errors.push(m.toUpperCase() + " → Mic not required");
+}
+
+// ✅ Console rules
+if(currentAssignment.console === "yamaha" && !p.yamahaChannel){
+  errors.push(m.toUpperCase() + " → Must use Yamaha");
+}
+
+if(currentAssignment.console === "api" && !p.apiChannel){
+  errors.push(m.toUpperCase() + " → Must use API");
+}
+
+// ✅ Mixed console rules
+if(currentAssignment.console === "mixed"){
+
+if(currentAssignment.api &&
+currentAssignment.api.includes(p.mic) &&
+!p.apiChannel){
+errors.push(m.toUpperCase() + " → Should be on API");
+}
+
+if(currentAssignment.yamaha &&
+currentAssignment.yamaha.includes(p.mic) &&
+!p.yamahaChannel){
+errors.push(m.toUpperCase() + " → Should be on Yamaha");
+}
+}
+
+// ✅ Lynx mapping (physical rule)
+if(p.yamahaChannel){
+let expected = p.yamahaChannel + 16;
+if(p.lynx !== expected){
+errors.push(m.toUpperCase() +
+" → Wrong Lynx / DAW Input (Yamaha CH " + p.yamahaChannel +
+" = AES " + (expected-16) + ")");
+}
+}
+
+if(p.apiChannel){
+let expected = p.apiChannel;
+if(p.lynx !== expected){
+errors.push(m.toUpperCase() +
+" → Wrong Lynx / DAW Input (API CH " + p.apiChannel +
+" = A Line " + expected + ")");
+}
+}
+
+}
+
+// ✅ Ensure ALL required mics are routed
+currentAssignment.mics.forEach(reqMic => {
+if(!paths[reqMic]){
+errors.push(reqMic.toUpperCase() + " → Not routed");
+}
+});
+
+return {
+valid: errors.length === 0,
+error: errors.join("<br>")
+};
+}
+
+/* ===== GAME ===== */
+
+function check(){
+
+// ✅ no paths built
+if(Object.keys(paths).length===0){
+return show("NO PATHS BUILT","is-warning");
+}
+
+// ✅ ensure full signal chain
+for(let m in paths){
+let p=paths[m];
+if(!(p.mic && p.room && p.studio && p.link && p.tie && p.patch && p.lynx)){
+return show("COMPLETE ALL CONNECTIONS","is-warning");
+}
+}
+
+// ✅ validate assignment
+
+let result = validateAssignment();
+if(!result.valid){
+life--;
+updateHearts();
+show(result.error, "is-error");
+if(life === 0){
+triggerGameOver();
+return;
+}
+nextAssignment();
+return;
+}
+
+
+// ✅ correct answer
+score++;
+document.getElementById("t"+score).classList.remove("is-empty");
+
+show("CORRECT PATCH","is-success");
+
+// ✅ move forward (no more retrying same question)
+nextAssignment();
+}
+/* ===== NEXT ASSIGNMENT ===== */
+
+
+function nextAssignment(){
+
+// ✅ STOP AFTER 10 QUESTIONS
+if(questionsAsked >= 10){
+
+let percent = Math.round((score / 10) * 100);
+
+// ✅ display final score
+document.getElementById("finalScore").innerText =
+"FINAL SCORE: " + percent + "%";
+
+// ✅ grade calculation
+let grade = "";
+
+if(percent >= 90) grade = "A";
+else if(percent >= 80) grade = "B";
+else if(percent >= 70) grade = "C";
+else if(percent >= 60) grade = "D";
+else grade = "F";
+
+document.getElementById("finalBreakdown").innerText =
+"(" + score + " / 10 CORRECT)  GRADE: " + grade;
+
+triggerWin();
+return;
+}
+
+// ✅ refill queue if needed
+if(queue.length === 0){
+queue = [...assignments];
+shuffle(queue);
+}
+
+// ✅ get next assignment
+currentAssignment = queue.pop();
+document.getElementById("assignmentText").innerText =
+currentAssignment.text;
+
+// ✅ increment counter
+questionsAsked++;
+
+// ✅ reset board
+clearBoard();
+}
+
+function triggerGameOver(){
+document.getElementById("dialog-game-over").showModal();
+}
+
+function triggerWin(){
+document.getElementById("dialog-win").showModal();
+}
+
+function manualReset(){
+
+// ✅ clear ALL routing buttons
+document.querySelectorAll(".jack").forEach(b=>{
+  b.classList.remove("is-success","is-warning","is-primary","is-error");
+});
+
+// ✅ reset data
+paths = {};
+currentMic = null;
+
+// ✅ hide popup
+document.getElementById("popup").classList.add("is-hidden");
+
+// ✅ clear message
+document.getElementById("message").innerHTML = "";
+
+}
+
+function updateHearts(){
+  for(let i=1;i<=5;i++){
+    let heart = document.getElementById("h"+i);
+    
+    if(i > life){
+      heart.classList.add("is-empty");
+    } else {
+      heart.classList.remove("is-empty");
+    }
+  }
+}
+
+function restartGame(){
+
+// ✅ close dialogs
+document.getElementById("dialog-win").close();
+document.getElementById("dialog-game-over").close();
+
+life = 5;
+score = 0;
+questionsAsked = 0;
+completedPaths.clear();
+
+// ✅ reset trophies
+for(let i = 1; i <= 10; i++){
+  let trophy = document.getElementById("t" + i);
+  if(trophy){
+    trophy.classList.add("is-empty");
+  }
+}
+
+// ✅ reset board + UI
+clearBoard();
+updateHearts();
+
+// ✅ start fresh
+nextAssignment();
+
+}
+
+/* INIT */
+nextAssignment();
+updateHearts();
+
+function show(text,type){
+
+let popup = document.getElementById("popup");
+let message = document.getElementById("message");
+
+popup.classList.remove("is-hidden");
+message.innerHTML = `<p class="nes-text ${{type}}">${{text}}</p>`;
+
+setTimeout(()=>{
+  popup.classList.add("is-hidden");
+}, 1500);
+
+}
+
+</script></p></body></html>
