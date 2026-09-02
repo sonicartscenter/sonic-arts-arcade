@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+body { font-family: 'Press Start 2P'; }
+.full-row { width:100%; margin-bottom:15px; }
+.button-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:15px; }
+.heart.is-empty, .trophy.is-empty { color:transparent; }
+p { margin-top:20px; }
+#popup { margin-top:15px; }
+</style>
+</head>
+
+<body class="nes-body">
+
+<h2 class="nes-text is-primary">MIC TRAINER</h2>
+
+<!-- HUD -->
+<div class="nes-container is-dark with-title full-row">
+<p class="title">SYSTEM HUD</p>
+
+<p>LIVES</p>
+<section>
+<i id="h1" class="nes-icon heart"></i>
+<i id="h2" class="nes-icon heart"></i>
+<i id="h3" class="nes-icon heart"></i>
+<i id="h4" class="nes-icon heart"></i>
+<i id="h5" class="nes-icon heart"></i>
+</section>
+
+<p>SCORE</p>
+<section>
+<i id="t1" class="nes-icon trophy is-empty"></i>
+<i id="t2" class="nes-icon trophy is-empty"></i>
+<i id="t3" class="nes-icon trophy is-empty"></i>
+<i id="t4" class="nes-icon trophy is-empty"></i>
+<i id="t5" class="nes-icon trophy is-empty"></i>
+<i id="t6" class="nes-icon trophy is-empty"></i>
+<i id="t7" class="nes-icon trophy is-empty"></i>
+<i id="t8" class="nes-icon trophy is-empty"></i>
+<i id="t9" class="nes-icon trophy is-empty"></i>
+<i id="t10" class="nes-icon trophy is-empty"></i>
+</section>
+
+<div class="button-row">
+<button class="nes-btn is-primary" onclick="checkAnswer()">CHECK</button>
+<button class="nes-btn is-error" onclick="manualReset()">RESET</button>
+</div>
+
+<div id="popup" class="is-hidden">
+<div id="popupMessage" class="nes-balloon from-left"></div>
+</div>
+
+</div>
+
+<!-- MIC -->
+<div class="nes-container is-dark with-title full-row">
+<p class="title">MICROPHONE</p>
+<p id="micName"></p>
+</div>
+
+<!-- QUESTIONS -->
+<div class="nes-container is-dark with-title full-row">
+<p class="title">MICROPHONE CHARACTERISTICS</p>
+
+<p>PHANTOM POWER +48V</p>
+<div class="button-row">
+<button id="phantom-true" class="nes-btn" onclick="setAnswer('phantom', true)">YES</button>
+<button id="phantom-false" class="nes-btn" onclick="setAnswer('phantom', false)">NO</button>
+</div>
+
+<p>POLARITY SWITCH / CAPSULES</p>
+<div class="button-row">
+<button id="polarity-true" class="nes-btn" onclick="setAnswer('polarity', true)">YES</button>
+<button id="polarity-false" class="nes-btn" onclick="setAnswer('polarity', false)">NO</button>
+</div>
+
+<p>FILTER / ROLLOFF</p>
+<div class="button-row">
+<button id="filter-true" class="nes-btn" onclick="setAnswer('filter', true)">YES</button>
+<button id="filter-false" class="nes-btn" onclick="setAnswer('filter', false)">NO</button>
+</div>
+
+<p>WOULD BENEFIT FROM A CLOUDLIFTER</p>
+<div class="button-row">
+<button id="cloudlifter-true" class="nes-btn" onclick="setAnswer('cloudlifter', true)">YES</button>
+<button id="cloudlifter-false" class="nes-btn" onclick="setAnswer('cloudlifter', false)">NO</button>
+</div>
+
+<p>EXTERNAL POWER SUPPLY</p>
+<div class="button-row">
+<button id="external-true" class="nes-btn" onclick="setAnswer('external', true)">YES</button>
+<button id="external-false" class="nes-btn" onclick="setAnswer('external', false)">NO</button>
+</div>
+
+</div>
+
+<!-- WIN MODAL -->
+<dialog id="dialog-win" class="nes-dialog is-dark is-rounded">
+<form method="dialog">
+<p class="title" style="text-align:center;">CONGRATULATIONS!</p>
+
+<p style="text-align:center;">
+YOU'VE COMPLETED THE MIC TRAINER
+</p>
+
+<p id="finalScore" class="nes-text is-success" style="text-align:center;"></p>
+
+<p id="finalBreakdown" style="text-align:center;"></p>
+
+<menu class="dialog-menu" style="text-align:center;">
+<button class="nes-btn is-success" onclick="restartGame()">START AGAIN</button>
+</menu>
+
+</form>
+</dialog>
+
+<script>
+
+let score = 0;
+let lives = 5;
+let currentMic;
+let questionCount = 0;
+let micQueue = [];
+let answers = {};
+
+const micDatabase = [
+{name:"Zigma SD-C", type:"condenser", feature:false},
+{name:"ADK Cremona 251", type:"condenser", feature:true},
+{name:"ADK Hamburg II", type:"condenser", feature:true},
+{name:"ADK Vienna II", type:"condenser", feature:true},
+{name:"ADK S51", type:"condenser", feature:true},
+{name:"ADK Z-67", type:"condenser", feature:true, external:true},
+{name:"AKG 451", type:"condenser", feature:true},
+{name:"AKG 414", type:"condenser", feature:true},
+{name:"AT 4047", type:"condenser", feature:true},
+{name:"Beyer MM1", type:"condenser", feature:false},
+{name:"Crown PZM-30D", type:"condenser", feature:false},
+{name:"DPA 4099", type:"condenser", feature:false},
+{name:"Earthworks QTC40", type:"condenser", feature:false},
+{name:"Mojave MA-200", type:"condenser", feature:true, external:true},
+{name:"Neumann U87", type:"condenser", feature:true},
+{name:"Sennheiser Ambeo", type:"condenser", feature:false},
+{name:"Sennheiser MKH416", type:"condenser", feature:false},
+{name:"Shure Beta 91A", type:"condenser", feature:false},
+{name:"Shure Beta 98", type:"condenser", feature:false},
+{name:"Shure SM81", type:"condenser", feature:true},
+{name:"Shure VP88", type:"condenser", feature:false},
+
+{name:"AEA R84", type:"ribbon", feature:false},
+{name:"Beyer M160", type:"ribbon", feature:false},
+{name:"Royer R121", type:"ribbon", feature:false},
+
+{name:"AKG D112", type:"dynamic", feature:false},
+{name:"Beyer M88", type:"dynamic", feature:false},
+{name:"Sennheiser e602", type:"dynamic", feature:false},
+{name:"MD421", type:"dynamic", feature:true},
+{name:"MD441", type:"dynamic", feature:true},
+{name:"SM7B", type:"dynamic", feature:false},
+{name:"SM57", type:"dynamic", feature:false},
+{name:"Beta57", type:"dynamic", feature:false},
+{name:"SM58", type:"dynamic", feature:false},
+{name:"Beta58", type:"dynamic", feature:false},
+{name:"Yamaha Subkick", type:"dynamic", feature:false}
+];
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+}
+
+function getCorrect(mic){
+const cloudlifterMics = [
+"SM7B",
+"AEA R84",
+"Royer R121",
+"Beyer M160"
+];
+return {
+phantom: mic.type==="condenser" && !mic.external,
+cloud: cloudlifterMics.includes(mic.name),
+external: mic.external===true,
+polarity: mic.feature===true,
+filter: mic.feature===true
+};
+}
+
+function validateAnswers(correct){
+let errors=[];
+if(answers.phantom!==correct.phantom){
+errors.push(
+`This microphone ${correct.phantom?"needs":"does NOT need"} phantom power.`
+);
+}
+if(answers.cloudlifter!==correct.cloud){
+errors.push(
+`This microphone ${correct.cloud?"would benefit from":"does NOT need"} a Cloudlifter.`
+);
+}
+if(answers.external!==correct.external){
+errors.push(
+`This microphone ${correct.external?"uses":"does NOT use"} an external power supply.`
+);
+}
+if(answers.polarity!==correct.polarity){
+errors.push(
+`This microphone ${correct.polarity?"has":"does NOT have"} switches or capsule options.`
+);
+}
+if(answers.filter!==correct.filter){
+errors.push(
+`This microphone ${correct.filter?"HAS":"does NOT have"} a filter / rolloff.`
+);
+}
+return errors;
+}
+function highlight(group,value){
+let yes=document.getElementById(group+"-true");
+let no=document.getElementById(group+"-false");
+yes.classList.remove("is-success");
+no.classList.remove("is-error");
+value?yes.classList.add("is-success"):no.classList.add("is-error");
+}
+
+function setAnswer(type,value){
+answers[type]=value;
+highlight(type,value);
+}
+
+function resetButtons(){
+["phantom","cloudlifter","polarity","external","filter"].forEach(type=>{
+document.getElementById(type+"-true").classList.remove("is-success");
+document.getElementById(type+"-false").classList.remove("is-error");
+});
+}
+
+function nextRound(){
+if(micQueue.length===0){
+micQueue=[...micDatabase];
+shuffle(micQueue);
+}
+currentMic=micQueue.pop();
+document.getElementById("micName").innerText=currentMic.name;
+answers={};
+resetButtons();
+document.getElementById("popup").classList.add("is-hidden");
+}
+
+function showPopup(text,type){
+let p=document.getElementById("popup");
+let m=document.getElementById("popupMessage");
+p.classList.remove("is-hidden");
+m.innerHTML=`<p class="nes-text ${type}" style="margin:0; white-space:pre-line;">${text}</p>`;
+setTimeout(()=>p.classList.add("is-hidden"),2000);
+}
+
+function checkAnswer(){
+
+if(
+answers.phantom===undefined ||
+answers.cloudlifter===undefined ||
+answers.polarity===undefined ||
+answers.external===undefined ||
+answers.filter===undefined
+){
+showPopup("COMPLETE ALL","is-warning");
+return;
+}
+
+let correct=getCorrect(currentMic);
+let errors=validateAnswers(correct);
+
+if(errors.length===0){
+score++;
+showPopup("CORRECT","is-success");
+}else{
+lives--;
+showPopup("WRONG\n"+errors.join("\n"),"is-error");
+}
+
+updateLives();
+updateScore();
+
+if(lives<=0){
+alert("GAME OVER\nSCORE: "+score);
+manualReset();
+return;
+}
+
+questionCount++;
+
+if(questionCount>=10){
+
+let percent=Math.round((score/10)*100);
+
+document.getElementById("finalScore").innerText =
+"SCORE: "+score+"/10 ("+percent+"%)";
+
+let letterGrade="";
+if(percent>=90) letterGrade="A";
+else if(percent>=80) letterGrade="B";
+else if(percent>=70) letterGrade="C";
+else if(percent>=60) letterGrade="D";
+else letterGrade="F";
+document.getElementById("finalBreakdown").innerText =
+"(" + score + " / 10 CORRECT) GRADE: " + letterGrade;
+
+document.getElementById("popup").classList.add("is-hidden");
+triggerWin();
+return;
+}
+
+nextRound();
+}
+
+function updateLives(){
+for(let i=1;i<=5;i++)
+document.getElementById("h"+i).classList.toggle("is-empty",i>lives);
+}
+
+function updateScore(){
+for(let i=1;i<=10;i++)
+document.getElementById("t"+i).classList.toggle("is-empty",i>score);
+}
+
+function triggerWin(){
+document.getElementById("dialog-win").showModal();
+}
+
+function restartGame(){
+document.getElementById("dialog-win").close();
+manualReset();
+}
+
+function manualReset(){
+score=0;
+lives=5;
+questionCount=0;
+micQueue=[];
+updateLives();
+updateScore();
+nextRound();
+for(let i=1;i<=10;i++){
+document.getElementById("t"+i).classList.add("is-empty");
+}
+}
+
+updateLives();
+updateScore();
+nextRound();
+
+</script>
+
+</body>
+</html>
