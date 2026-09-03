@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+body {
+font-family:'Press Start 2P';
+}
+
+.full-row{
+width:100%;
+margin-bottom:15px;
+}
+
+.button-row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.heart.is-empty,
+.trophy.is-empty{
+color:transparent;
+}
+
+p{
+margin-top:20px;
+}
+
+#popup{
+margin-top:15px;
+}
+
+.answer-btn{
+width:100%;
+}
+
+.answer-column{
+display:flex;
+flex-direction:column;
+gap:10px;
+margin-top:15px;
+max-width:500px;
+}
+</style>
+
+</head>
+
+<body class="nes-body">
+
+<h2 class="nes-text is-primary">
+LEVEL TRAINER
+</h2>
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">SYSTEM HUD</p>
+
+<p>LIVES</p>
+
+<section>
+<i id="h1" class="nes-icon heart"></i>
+<i id="h2" class="nes-icon heart"></i>
+<i id="h3" class="nes-icon heart"></i>
+<i id="h4" class="nes-icon heart"></i>
+<i id="h5" class="nes-icon heart"></i>
+</section>
+
+<p>SCORE</p>
+
+<section>
+<i id="t1" class="nes-icon trophy is-empty"></i>
+<i id="t2" class="nes-icon trophy is-empty"></i>
+<i id="t3" class="nes-icon trophy is-empty"></i>
+<i id="t4" class="nes-icon trophy is-empty"></i>
+<i id="t5" class="nes-icon trophy is-empty"></i>
+<i id="t6" class="nes-icon trophy is-empty"></i>
+<i id="t7" class="nes-icon trophy is-empty"></i>
+<i id="t8" class="nes-icon trophy is-empty"></i>
+<i id="t9" class="nes-icon trophy is-empty"></i>
+<i id="t10" class="nes-icon trophy is-empty"></i>
+</section>
+
+<div class="button-row">
+
+<button class="nes-btn is-primary"
+onclick="checkAnswer()">
+CHECK
+</button>
+
+<button class="nes-btn is-error"
+onclick="manualReset()">
+RESET
+</button>
+
+</div>
+
+<div id="popup" class="is-hidden">
+<div id="popupMessage" class="nes-balloon from-left"></div>
+</div>
+
+</div>
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+SCENARIO
+</p>
+
+<p id="scenarioText">
+Loading...
+</p>
+
+</div>
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+WHAT SIGNAL LEVEL EXISTS ON THE CABLE?
+</p>
+
+<div class="answer-column">
+
+<button id="mic-btn"
+class="nes-btn answer-btn"
+onclick="setAnswer('mic')">
+MIC LEVEL
+</button>
+
+<button id="instrument-btn"
+class="nes-btn answer-btn"
+onclick="setAnswer('instrument')">
+INSTRUMENT LEVEL
+</button>
+
+<button id="line-btn"
+class="nes-btn answer-btn"
+onclick="setAnswer('line')">
+LINE LEVEL
+</button>
+
+<button id="speaker-btn"
+class="nes-btn answer-btn"
+onclick="setAnswer('speaker')">
+SPEAKER LEVEL
+</button>
+
+</div>
+
+</div>
+
+<dialog id="dialog-game-over"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title"
+style="text-align:center;">
+GAME OVER
+</p>
+
+<menu class="dialog-menu"
+style="text-align:center;">
+
+<button class="nes-btn is-primary"
+onclick="restartGame()">
+TRY AGAIN
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<dialog id="dialog-win"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title"
+style="text-align:center;">
+CONGRATULATIONS!
+</p>
+
+<p style="text-align:center;">
+YOU'VE COMPLETED THE LEVEL TRAINER
+</p>
+
+<p id="finalScore"
+class="nes-text is-success"
+style="text-align:center;">
+</p>
+
+<p id="finalBreakdown"
+style="text-align:center;">
+</p>
+
+<menu class="dialog-menu"
+style="text-align:center;">
+
+<button class="nes-btn is-success"
+onclick="restartGame()">
+START AGAIN
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<script>
+
+let score = 0;
+let lives = 5;
+let questionCount = 0;
+
+let scenarioQueue = [];
+let currentScenario = null;
+let selectedAnswer = null;
+const scenarios = [
+
+{
+text:"A Shure SM58 is connected directly to an API preamp input.",
+answer:"mic",
+explanation:"A microphone connected directly to a microphone preamp produces Mic Level."
+},
+
+{
+text:"A Neumann U87 output is sent to a Pacifica preamp.",
+answer:"mic",
+explanation:"The output of a microphone is Mic Level before amplification."
+},
+
+{
+text:"A Royer R121 is connected to a Yamaha console microphone input.",
+answer:"mic",
+explanation:"Ribbon microphones produce Mic Level signals."
+},
+
+{
+text:"A Sennheiser MD421 is plugged into an API preamp.",
+answer:"mic",
+explanation:"The output of a microphone is Mic Level."
+},
+
+{
+text:"The XLR output of a Radial DI box is connected to an API preamp.",
+answer:"mic",
+explanation:"A DI box converts Instrument Level to Mic Level on its XLR output."
+},
+
+{
+text:"A Les Paul guitar is plugged directly into a pedal board.",
+answer:"instrument",
+explanation:"Electric guitars produce Instrument Level signals."
+},
+
+{
+text:"A Fender Telecaster is connected directly to a Radial DI box input.",
+answer:"instrument",
+explanation:"The guitar cable feeding a DI carries Instrument Level."
+},
+
+{
+text:"A Fender Jazz Bass is plugged into an Ampeg amplifier input.",
+answer:"instrument",
+explanation:"The signal leaving the bass and entering the amplifier is Instrument Level."
+},
+
+{
+text:"A pedal board output is connected to an Egnater amplifier input.",
+answer:"instrument",
+explanation:"Pedals feeding a guitar amplifier are typically operating at Instrument Level."
+},
+
+{
+text:"A Fender Telecaster is plugged into a Fender Bassman amplifier input.",
+answer:"instrument",
+explanation:"The signal entering a guitar amplifier from a guitar is Instrument Level."
+},
+
+{
+text:"An API preamp output is connected to an 1176 compressor input.",
+answer:"line",
+explanation:"Once amplified by a microphone preamp, the signal becomes Line Level."
+},
+
+{
+text:"An 1176 output is connected to a Yamaha console line input.",
+answer:"line",
+explanation:"Compressors generally operate with Line Level signals."
+},
+
+{
+text:"A Yamaha console direct output feeds a DAW interface input.",
+answer:"line",
+explanation:"Console outputs feeding recording interfaces are Line Level."
+},
+
+{
+text:"A Pacifica preamp output is connected to a compressor.",
+answer:"line",
+explanation:"A microphone preamp output is Line Level."
+},
+
+{
+text:"A Wurlitzer output is connected to a Yamaha console line input.",
+answer:"line",
+explanation:"The output of a keyboard is typically Line Level."
+},
+
+{
+text:"A Yamaha console output is connected to a Radial Reamp box.",
+answer:"line",
+explanation:"A Reamp box receives Line Level and converts it to Instrument Level."
+},
+
+{
+text:"A Radial Reamp box output is connected to a Fender Bassman amplifier input.",
+answer:"instrument",
+explanation:"The output of a Reamp box is Instrument Level."
+},
+
+{
+text:"A Fender Bassman speaker output feeds a speaker cabinet.",
+answer:"speaker",
+explanation:"A power amplifier feeding a speaker cabinet produces Speaker Level."
+},
+
+{
+text:"An Ampeg amplifier speaker output feeds a bass cabinet.",
+answer:"speaker",
+explanation:"Amplifier speaker outputs carry Speaker Level signals."
+},
+
+{
+text:"An Egnater amplifier speaker output is connected to a guitar cabinet.",
+answer:"speaker",
+explanation:"The cable between an amplifier speaker output and cabinet carries Speaker Level."
+}
+
+];
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+}
+
+function setAnswer(answer){
+
+selectedAnswer = answer;
+
+document.querySelectorAll(".answer-btn").forEach(btn=>{
+btn.classList.remove(
+"is-success",
+"is-primary",
+"is-warning",
+"is-error"
+);
+});
+
+if(answer==="mic"){
+document.getElementById("mic-btn")
+.classList.add("is-success");
+}
+
+if(answer==="instrument"){
+document.getElementById("instrument-btn")
+.classList.add("is-warning");
+}
+
+if(answer==="line"){
+document.getElementById("line-btn")
+.classList.add("is-primary");
+}
+
+if(answer==="speaker"){
+document.getElementById("speaker-btn")
+.classList.add("is-error");
+}
+
+}
+
+function resetAnswerButtons(){
+
+document.querySelectorAll(".answer-btn").forEach(btn=>{
+btn.classList.remove(
+"is-success",
+"is-primary",
+"is-warning",
+"is-error"
+);
+});
+
+selectedAnswer = null;
+
+}
+
+function nextRound(){
+
+if(scenarioQueue.length===0){
+scenarioQueue=[...scenarios];
+shuffle(scenarioQueue);
+}
+
+currentScenario=scenarioQueue.pop();
+
+document.getElementById("scenarioText").innerText =
+currentScenario.text;
+
+resetAnswerButtons();
+
+document.getElementById("popup")
+.classList.add("is-hidden");
+
+}
+function showPopup(text,type){
+
+let p=document.getElementById("popup");
+let m=document.getElementById("popupMessage");
+
+p.classList.remove("is-hidden");
+
+m.innerHTML=
+`<p class="nes-text ${type}"
+style="margin:0;white-space:pre-line;">
+${text}
+</p>`;
+
+setTimeout(()=>{
+p.classList.add("is-hidden");
+},2500);
+
+}
+
+function checkAnswer(){
+
+if(selectedAnswer===null){
+showPopup(
+"SELECT AN ANSWER",
+"is-warning"
+);
+return;
+}
+
+if(selectedAnswer===currentScenario.answer){
+
+score++;
+
+showPopup(
+"CORRECT",
+"is-success"
+);
+
+}else{
+
+lives--;
+
+showPopup(
+"WRONG\n" + currentScenario.explanation,
+"is-error"
+);
+
+}
+
+updateLives();
+updateScore();
+
+if(lives<=0){
+triggerGameOver();
+return;
+}
+
+questionCount++;
+
+if(questionCount>=10){
+
+let percent=Math.round(
+(score/10)*100
+);
+
+document.getElementById("finalScore").innerText=
+"SCORE: " +
+score +
+"/10 (" +
+percent +
+"%)";
+
+let letterGrade="";
+
+if(percent>=90){
+letterGrade="A";
+}
+else if(percent>=80){
+letterGrade="B";
+}
+else if(percent>=70){
+letterGrade="C";
+}
+else if(percent>=60){
+letterGrade="D";
+}
+else{
+letterGrade="F";
+}
+
+document.getElementById("finalBreakdown").innerText=
+"(" +
+score +
+" / 10 CORRECT)  GRADE: " +
+letterGrade;
+
+document.getElementById("popup")
+.classList.add("is-hidden");
+
+triggerWin();
+return;
+}
+
+nextRound();
+
+}
+
+function updateLives(){
+
+for(let i=1;i<=5;i++){
+
+document.getElementById("h"+i)
+.classList.toggle(
+"is-empty",
+i>lives
+);
+
+}
+
+}
+
+function updateScore(){
+
+for(let i=1;i<=10;i++){
+
+document.getElementById("t"+i)
+.classList.toggle(
+"is-empty",
+i>score
+);
+
+}
+
+}
+
+function triggerGameOver(){
+
+document
+.getElementById("dialog-game-over")
+.showModal();
+
+}
+
+function triggerWin(){
+
+document
+.getElementById("dialog-win")
+.showModal();
+
+}
+
+function restartGame(){
+
+document
+.getElementById("dialog-win")
+.close();
+
+document
+.getElementById("dialog-game-over")
+.close();
+
+manualReset();
+
+}
+
+function manualReset(){
+
+score=0;
+lives=5;
+questionCount=0;
+scenarioQueue=[];
+
+for(let i=1;i<=10;i++){
+document
+.getElementById("t"+i)
+.classList.add("is-empty");
+}
+
+updateLives();
+updateScore();
+
+nextRound();
+
+}
+
+nextRound();
+updateLives();
+updateScore();
+
+</script>
+
+<footer
+class="nes-container is-dark"
+style="margin-top:40px;text-align:center;">
+<p>Sonic Arts Arcade • Powered by NES.css</p>
+</footer>
+
+</body>
+</html>
