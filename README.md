@@ -25,17 +25,6 @@ Students will develop proficiency in:
 - Audio signal level identification
 - Studio troubleshooting and critical thinking
 
-## Future Games
-
-Planned additions to Sonic Arts Arcade include:
-
-- 🎹 MIDI Trainer
-- 🎚️ Gain Staging Challenge
-- 🎛️ Signal Flow Hero
-- 🔌 Cable & Connector Trainer
-- 🥁 Drum Microphone Placement Simulator
-- 🎧 Headphone Mix Builder
-
 ## Credits
 
 This project uses **NES.css**, a CSS framework inspired by classic Nintendo Entertainment System (NES) interfaces.
