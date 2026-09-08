@@ -153,6 +153,47 @@ SPEAKER LEVEL
 </div>
 
 </div>
+</div>
+
+<!-- WELCOME -->
+
+<dialog id="dialog-start"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title"
+style="text-align:center;">
+WELCOME
+</p>
+
+<p style="text-align:center;">
+ENTER YOUR NAME
+</p>
+
+<input
+id="studentName"
+class="nes-input"
+type="text"
+placeholder="Your Name">
+
+<menu
+class="dialog-menu"
+style="text-align:center;">
+
+<button
+class="nes-btn is-primary"
+onclick="startGame()">
+START
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<!-- GAME OVER -->
 
 <dialog id="dialog-game-over"
 class="nes-dialog is-dark is-rounded">
@@ -162,6 +203,10 @@ class="nes-dialog is-dark is-rounded">
 <p class="title"
 style="text-align:center;">
 GAME OVER
+</p>
+
+<p id="gameOverMessage"
+style="text-align:center;">
 </p>
 
 <menu class="dialog-menu"
@@ -186,6 +231,10 @@ class="nes-dialog is-dark is-rounded">
 <p class="title"
 style="text-align:center;">
 CONGRATULATIONS!
+</p>
+
+<p id="winMessage"
+style="text-align:center;">
 </p>
 
 <p style="text-align:center;">
@@ -220,6 +269,7 @@ START AGAIN
 let score = 0;
 let lives = 5;
 let questionCount = 0;
+let studentName = "Student";
 
 let scenarioQueue = [];
 let currentScenario = null;
@@ -423,6 +473,27 @@ document.getElementById("popup")
 .classList.add("is-hidden");
 
 }
+
+function startGame(){
+
+studentName =
+document
+.getElementById("studentName")
+.value
+.trim();
+
+if(studentName===""){
+studentName="Student";
+}
+
+document
+.getElementById("dialog-start")
+.close();
+
+nextRound();
+
+}
+
 function showPopup(text,type){
 
 let p=document.getElementById("popup");
@@ -430,11 +501,7 @@ let m=document.getElementById("popupMessage");
 
 p.classList.remove("is-hidden");
 
-m.innerHTML=
-`<p class="nes-text ${type}"
-style="margin:0;white-space:pre-line;">
-${text}
-</p>`;
+m.innerHTML=`<p class="nes-text ${type}" style="margin:0; white-space:pre-line;">${text}</p>`;
 
 setTimeout(()=>{
 p.classList.add("is-hidden");
@@ -489,7 +556,8 @@ let percent=Math.round(
 );
 
 document.getElementById("finalScore").innerText=
-"SCORE: " +
+studentName +
+"  •  SCORE: " +
 score +
 "/10 (" +
 percent +
@@ -513,11 +581,8 @@ else{
 letterGrade="F";
 }
 
-document.getElementById("finalBreakdown").innerText=
-"(" +
-score +
-" / 10 CORRECT)  GRADE: " +
-letterGrade;
+document.getElementById("finalBreakdown").innerText =
+"GRADE: " + letterGrade;
 
 document.getElementById("popup")
 .classList.add("is-hidden");
@@ -559,6 +624,12 @@ i>score
 }
 
 function triggerGameOver(){
+
+document
+.getElementById("gameOverMessage")
+.innerText =
+studentName +
+", YOU RAN OUT OF LIVES.";
 
 document
 .getElementById("dialog-game-over")
@@ -608,9 +679,12 @@ nextRound();
 
 }
 
-nextRound();
 updateLives();
 updateScore();
+
+document
+.getElementById("dialog-start")
+.showModal();
 
 </script>
 
