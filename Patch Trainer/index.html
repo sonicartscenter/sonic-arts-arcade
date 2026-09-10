@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
-<html><head>
+<html>
+<head>
 <meta charset="UTF-8">
 
 <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
 body { font-family: 'Press Start 2P'; }
@@ -14,91 +16,197 @@ body { font-family: 'Press Start 2P'; }
 
 .heart.is-empty, .trophy.is-empty { color:transparent; }
 </style>
-</head><body class="nes-body"><h2 class="nes-text is-primary">PATCH TRAINER</h2>
+</head>
+
+<body class="nes-body">
+
+<h2 class="nes-text is-primary">PATCH TRAINER</h2>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">SYSTEM HUD</p>
+
 <p>LIVES</p>
-<section><i id="h1" class="nes-icon heart"></i> <i id="h2" class="nes-icon heart"></i> <i id="h3" class="nes-icon heart"></i> <i id="h4" class="nes-icon heart"></i> <i id="h5" class="nes-icon heart"></i></section>
+<section>
+<i id="h1" class="nes-icon heart"></i>
+<i id="h2" class="nes-icon heart"></i>
+<i id="h3" class="nes-icon heart"></i>
+<i id="h4" class="nes-icon heart"></i>
+<i id="h5" class="nes-icon heart"></i>
+</section>
+
 <p>SCORE</p>
-<section><i id="t1" class="nes-icon trophy is-empty"></i> <i id="t2" class="nes-icon trophy is-empty"></i> <i id="t3" class="nes-icon trophy is-empty"></i> <i id="t4" class="nes-icon trophy is-empty"></i> <i id="t5" class="nes-icon trophy is-empty"></i> <i id="t6" class="nes-icon trophy is-empty"></i> <i id="t7" class="nes-icon trophy is-empty"></i> <i id="t8" class="nes-icon trophy is-empty"></i> <i id="t9" class="nes-icon trophy is-empty"></i> <i id="t10" class="nes-icon trophy is-empty"></i></section>
-<div class="button-row"><button class="nes-btn is-primary" onclick="check()">CHECK PATH</button> <button class="nes-btn is-error" onclick="manualReset()">RESET</button></div>
+<section>
+<i id="t1" class="nes-icon trophy is-empty"></i>
+<i id="t2" class="nes-icon trophy is-empty"></i>
+<i id="t3" class="nes-icon trophy is-empty"></i>
+<i id="t4" class="nes-icon trophy is-empty"></i>
+<i id="t5" class="nes-icon trophy is-empty"></i>
+<i id="t6" class="nes-icon trophy is-empty"></i>
+<i id="t7" class="nes-icon trophy is-empty"></i>
+<i id="t8" class="nes-icon trophy is-empty"></i>
+<i id="t9" class="nes-icon trophy is-empty"></i>
+<i id="t10" class="nes-icon trophy is-empty"></i>
+</section>
+
+<div class="button-row">
+<button class="nes-btn is-primary" onclick="check()">CHECK PATH</button>
+<button class="nes-btn is-error" onclick="manualReset()">RESET</button>
+</div>
+
 <div id="popup" class="is-hidden">
 <div id="message" class="nes-balloon from-left"></div>
 </div>
 </div>
+
+<!-- WELCOME -->
+
+<dialog id="dialog-start"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title" style="text-align:center;">
+WELCOME
+</p>
+
+<p style="text-align:center;">
+ENTER YOUR NAME
+</p>
+
+<input
+id="studentName"
+class="nes-input"
+type="text"
+placeholder="Your Name">
+
+<menu class="dialog-menu"
+style="text-align:center;">
+
+<button
+class="nes-btn is-primary"
+onclick="startGame()">
+START
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
 <!-- GAME OVER -->
-<p></p>
-<p></p>
-<p></p>
-<p></p>
-<p></p><dialog id="dialog-game-over" class="nes-dialog is-dark is-rounded"><form method="dialog">
-<p class="title" style="text-align: center;">GAME OVER</p>
-<menu class="dialog-menu" style="text-align: center;"><button class="nes-btn is-primary" onclick="restartGame()">TRY AGAIN</button></menu></form></dialog><p></p>
-<p></p>
-<p></p>
-<p></p>
-<p></p>
+
+<dialog id="dialog-game-over"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title"
+style="text-align:center;">
+GAME OVER
+</p>
+
+<p id="gameOverMessage"
+style="text-align:center;">
+</p>
+
+<menu class="dialog-menu"
+style="text-align:center;">
+
+<button class="nes-btn is-primary"
+onclick="restartGame()">
+TRY AGAIN
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
 <!-- WIN -->
-<p></p>
-<p></p>
-<p></p>
-<p></p>
-<p></p><dialog id="dialog-win" class="nes-dialog is-dark is-rounded"><form method="dialog">
-<p class="title" style="text-align: center;">CONGRATULATIONS!</p>
-<p style="text-align: center;">YOU'VE COMPLETED THE PATCH TRAINER</p>
-<p id="finalScore" class="nes-text is-success" style="text-align: center;"></p>
-<p id="finalBreakdown" style="text-align: center;"></p>
-<menu class="dialog-menu" style="text-align: center;"><button class="nes-btn is-success" onclick="restartGame()">START AGAIN</button></menu></form></dialog><p></p>
-<p></p>
-<p></p>
-<p></p>
-<p></p>
+<dialog id="dialog-win" class="nes-dialog is-dark is-rounded">
+<form method="dialog">
+<p class="title" style="text-align:center;">CONGRATULATIONS!</p>
+<p id="winMessage"
+style="text-align:center;">
+</p>
+<p style="text-align:center;">YOU'VE COMPLETED THE PATCH TRAINER</p>
+<p id="finalScore" class="nes-text is-success" style="text-align:center;"></p>
+<p id="finalBreakdown" style="text-align:center;"></p>
+<menu class="dialog-menu" style="text-align:center;">
+<button class="nes-btn is-success" onclick="restartGame()">START AGAIN</button>
+</menu>
+</form>
+</dialog>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">ASSIGNMENT</p>
 <p id="assignmentText">Loading...</p>
 </div>
+
 <!-- MIC -->
 <div class="nes-container is-dark with-title full-row">
 <p class="title">MICROPHONE</p>
-<div class="button-row mic-group"><button class="nes-btn jack" onclick="setStage('mic',this,'sm58')">SM58</button> <button class="nes-btn jack" onclick="setStage('mic',this,'u87')">U87</button> <button class="nes-btn jack" onclick="setStage('mic',this,'414')">414</button> <button class="nes-btn jack" onclick="setStage('mic',this,'441')">441</button></div>
+<div class="button-row mic-group">
+<button class="nes-btn jack" onclick="setStage('mic',this,'sm58')">SM58</button>
+<button class="nes-btn jack" onclick="setStage('mic',this,'u87')">U87</button>
+<button class="nes-btn jack" onclick="setStage('mic',this,'414')">414</button>
+<button class="nes-btn jack" onclick="setStage('mic',this,'441')">441</button>
 </div>
+</div>
+
 <!-- ROOM -->
 <div class="nes-container is-dark with-title full-row">
 <p class="title">STUDIO ROOM</p>
-<div class="button-row"><button class="nes-btn jack" onclick="setStage('room',this,'199')">199 Iso Booth</button> <button class="nes-btn jack" onclick="setStage('room',this,'190')">190 Ensemble Room</button> <button class="nes-btn jack" onclick="setStage('room',this,'95')">95 Recital Hall</button></div>
+<div class="button-row">
+<button class="nes-btn jack" onclick="setStage('room',this,'199')">199 Iso Booth</button>
+<button class="nes-btn jack" onclick="setStage('room',this,'190')">190 Ensemble Room</button>
+<button class="nes-btn jack" onclick="setStage('room',this,'95')">95 Recital Hall</button>
 </div>
+</div>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">STUDIO IN</p>
 <div id="studio" class="button-row"></div>
 </div>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">PCC TIE LINES</p>
+
 <div class="nes-container is-dark with-title">
 <p class="title">FROM STUDIO</p>
 <div id="link" class="button-row"></div>
 </div>
+
 <div class="nes-container is-dark with-title">
 <p class="title">TO CONTROL ROOM</p>
 <div id="tie" class="button-row"></div>
 </div>
+
 </div>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">CONTROL ROOM PATCHBAY</p>
 <div id="patch" class="button-row"></div>
 </div>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">API PREAMPS CHANNEL #</p>
 <div id="apiChannel" class="button-row"></div>
 </div>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">YAMAHA O2R CHANNEL #</p>
 <div id="yamahaChannel" class="button-row"></div>
 </div>
+
 <div class="nes-container is-dark with-title full-row">
 <p class="title">LYNX AURORA / DAW INPUT</p>
 <div id="lynx" class="button-row"></div>
 </div>
-<p><script>
+
+<script>
 
 /* ===== STATE ===== */
 let paths = {};
@@ -108,6 +216,7 @@ let micLynx = {};
 
 let life = 5;
 let score = 0;
+let studentName = "Student";
 let questionsAsked = 0;
 
 /* ===== ASSIGNMENTS ===== */
@@ -215,7 +324,7 @@ create("lynx","lynx",i,label);
 
 function clearStageForMic(stage, mic){
 let color=getColor(mic);
-document.querySelectorAll(`#${{stage}} .jack`).forEach(b=>b.classList.remove(color));
+document.querySelectorAll(`#${stage} .jack`).forEach(b=>b.classList.remove(color));
 }
 
 function clearBoard(){
@@ -229,7 +338,7 @@ currentMic=null;
 function renderMicState(mic){
 ["apiChannel","yamahaChannel"].forEach(stage=>{
   let color = getColor(mic);
-  document.querySelectorAll(`#${{stage}} .jack`).forEach(btn=>{
+  document.querySelectorAll(`#${stage} .jack`).forEach(btn=>{
     btn.classList.remove(color);
   });
 });
@@ -463,7 +572,12 @@ let percent = Math.round((score / 10) * 100);
 
 // ✅ display final score
 document.getElementById("finalScore").innerText =
-"FINAL SCORE: " + percent + "%";
+studentName +
+" • SCORE: " +
+score +
+"/10 (" +
+percent +
+"%)";
 
 // ✅ grade calculation
 let grade = "";
@@ -475,7 +589,7 @@ else if(percent >= 60) grade = "D";
 else grade = "F";
 
 document.getElementById("finalBreakdown").innerText =
-"(" + score + " / 10 CORRECT)  GRADE: " + grade;
+"GRADE: " + grade;
 
 triggerWin();
 return;
@@ -499,12 +613,53 @@ questionsAsked++;
 clearBoard();
 }
 
+function startGame(){
+
+studentName =
+document
+.getElementById("studentName")
+.value
+.trim();
+
+if(studentName===""){
+studentName="Student";
+}
+
+document
+.getElementById("dialog-start")
+.close();
+
+nextAssignment();
+
+}
+
 function triggerGameOver(){
-document.getElementById("dialog-game-over").showModal();
+
+document
+.getElementById("gameOverMessage")
+.innerText =
+studentName +
+", YOU RAN OUT OF LIVES.";
+
+document
+.getElementById("dialog-game-over")
+.showModal();
+
 }
 
 function triggerWin(){
-document.getElementById("dialog-win").showModal();
+
+document
+.getElementById("winMessage")
+.innerText =
+"GREAT JOB, " +
+studentName +
+"!";
+
+document
+.getElementById("dialog-win")
+.showModal();
+
 }
 
 function manualReset(){
@@ -567,8 +722,11 @@ nextAssignment();
 }
 
 /* INIT */
-nextAssignment();
 updateHearts();
+
+document
+.getElementById("dialog-start")
+.showModal();
 
 function show(text,type){
 
@@ -576,7 +734,7 @@ let popup = document.getElementById("popup");
 let message = document.getElementById("message");
 
 popup.classList.remove("is-hidden");
-message.innerHTML = `<p class="nes-text ${{type}}">${{text}}</p>`;
+message.innerHTML = `<p class="nes-text ${type}">${text}</p>`;
 
 setTimeout(()=>{
   popup.classList.add("is-hidden");
@@ -585,11 +743,12 @@ setTimeout(()=>{
 }
 
 </script>
-  
+
 <footer
 class="nes-container is-dark"
 style="margin-top:40px;text-align:center;">
 <p>Sonic Arts Arcade • Powered by NES.css</p>
 </footer>
-  
-</p></body></html>
+
+</body>
+</html>
