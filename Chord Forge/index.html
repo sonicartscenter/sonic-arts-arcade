@@ -152,6 +152,707 @@ LEVEL 2
 
 </div>
 
+<p
+id="levelDescription"
+style="margin-top:20px;text-align:center;">
+LEVEL 1:
+MAJOR & MINOR CHORDS
+</p>
+
+<menu class="dialog-menu"
+style="text-align:center;">
+
+<button
+class="nes-btn is-error"
+onclick="startGame()">
+START
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<!-- GAME OVER -->
+
+<dialog id="dialog-game-over"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title">GAME OVER</p>
+
+<p id="gameOverMessage"></p>
+
+<menu class="dialog-menu">
+
+<button
+class="nes-btn is-primary"
+onclick="restartGame()">
+TRY AGAIN
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<!-- WIN -->
+
+<dialog id="dialog-win"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title">
+CONGRATULATIONS!
+</p>
+
+<p id="winMessage"></p>
+
+<p>
+YOU'VE COMPLETED CHORD FORGE
+</p>
+
+<p id="finalScore"
+class="nes-text is-success">
+</p>
+
+<p id="finalBreakdown"></p>
+
+<menu class="dialog-menu">
+
+<button
+class="nes-btn is-success"
+onclick="restartGame()">
+START AGAIN
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<!-- ASSIGNMENT -->
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+BUILD THE CHORD
+</p>
+
+<p id="chordText">
+Loading...
+</p>
+
+</div>
+
+<!-- NOTE BUTTONS -->
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+SELECT NOTES
+</p>
+
+<div class="button-row">
+
+<button class="nes-btn note-btn" onclick="toggleNote(this,'C')">C</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'C#')">C#</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'Db')">Db</button>
+
+<button class="nes-btn note-btn" onclick="toggleNote(this,'D')">D</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'D#')">D#</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'Eb')">Eb</button>
+
+<button class="nes-btn note-btn" onclick="toggleNote(this,'E')">E</button>
+
+<button class="nes-btn note-btn" onclick="toggleNote(this,'F')">F</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'F#')">F#</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'Gb')">Gb</button>
+
+<button class="nes-btn note-btn" onclick="toggleNote(this,'G')">G</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'G#')">G#</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'Ab')">Ab</button>
+
+<button class="nes-btn note-btn" onclick="toggleNote(this,'A')">A</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'A#')">A#</button>
+<button class="nes-btn note-btn" onclick="toggleNote(this,'Bb')">Bb</button>
+
+<button class="nes-btn note-btn" onclick="toggleNote(this,'B')">B</button>
+
+</div>
+
+</div>
+
+<script>
+
+let score = 0;
+let lives = 5;
+let questionCount = 0;
+let studentName = "Student";
+
+let gameLevel = 1;
+
+let selectedNotes = [];
+
+let chordQueue = [];
+
+let currentChord = null;
+
+const level1Chords = [
+
+{name:"C Major",notes:["C","E","G"]},
+{name:"Db Major",notes:["Db","F","Ab"]},
+{name:"D Major",notes:["D","F#","A"]},
+{name:"Eb Major",notes:["Eb","G","Bb"]},
+{name:"E Major",notes:["E","G#","B"]},
+{name:"F Major",notes:["F","A","C"]},
+{name:"Gb Major",notes:["Gb","Bb","Db"]},
+{name:"G Major",notes:["G","B","D"]},
+{name:"Ab Major",notes:["Ab","C","Eb"]},
+{name:"A Major",notes:["A","C#","E"]},
+{name:"Bb Major",notes:["Bb","D","F"]},
+{name:"B Major",notes:["B","D#","F#"]},
+
+{name:"C Minor",notes:["C","Eb","G"]},
+{name:"C# Minor",notes:["C#","E","G#"]},
+{name:"D Minor",notes:["D","F","A"]},
+{name:"Eb Minor",notes:["Eb","Gb","Bb"]},
+{name:"E Minor",notes:["E","G","B"]},
+{name:"F Minor",notes:["F","Ab","C"]},
+{name:"F# Minor",notes:["F#","A","C#"]},
+{name:"G Minor",notes:["G","Bb","D"]},
+{name:"G# Minor",notes:["G#","B","D#"]},
+{name:"A Minor",notes:["A","C","E"]},
+{name:"Bb Minor",notes:["Bb","Db","F"]},
+{name:"B Minor",notes:["B","D","F#"]}
+
+];
+
+const level2Chords = [
+
+{name:"C Diminished",notes:["C","Eb","Gb"]},
+{name:"D Diminished",notes:["D","F","Ab"]},
+{name:"E Diminished",notes:["E","G","Bb"]},
+{name:"F Diminished",notes:["F","Ab","B"]},
+{name:"G Diminished",notes:["G","Bb","Db"]},
+{name:"A Diminished",notes:["A","C","Eb"]},
+{name:"B Diminished",notes:["B","D","F"]},
+
+{name:"C Augmented",notes:["C","E","G#"]},
+{name:"D Augmented",notes:["D","F#","A#"]},
+{name:"E Augmented",notes:["E","G#","C"]},
+{name:"F Augmented",notes:["F","A","C#"]},
+{name:"G Augmented",notes:["G","B","D#"]},
+{name:"A Augmented",notes:["A","C#","F"]},
+{name:"B Augmented",notes:["B","D#","G"]},
+
+{name:"C7",notes:["C","E","G","Bb"]},
+{name:"D7",notes:["D","F#","A","C"]},
+{name:"E7",notes:["E","G#","B","D"]},
+{name:"F7",notes:["F","A","C","Eb"]},
+{name:"G7",notes:["G","B","D","F"]},
+{name:"A7",notes:["A","C#","E","G"]},
+{name:"B7",notes:["B","D#","F#","A"]},
+
+{name:"Cmaj7",notes:["C","E","G","B"]},
+{name:"Dmaj7",notes:["D","F#","A","C#"]},
+{name:"Emaj7",notes:["E","G#","B","D#"]},
+{name:"Fmaj7",notes:["F","A","C","E"]},
+{name:"Gmaj7",notes:["G","B","D","F#"]},
+{name:"Amaj7",notes:["A","C#","E","G#"]},
+{name:"Bmaj7",notes:["B","D#","F#","A#"]},
+
+{name:"Cm7",notes:["C","Eb","G","Bb"]},
+{name:"Dm7",notes:["D","F","A","C"]},
+{name:"Em7",notes:["E","G","B","D"]},
+{name:"Fm7",notes:["F","Ab","C","Eb"]},
+{name:"Gm7",notes:["G","Bb","D","F"]},
+{name:"Am7",notes:["A","C","E","G"]},
+{name:"Bm7",notes:["B","D","F#","A"]}
+
+];
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+}
+
+function startGame(){
+
+studentName =
+document.getElementById("studentName")
+.value.trim();
+
+if(studentName===""){
+studentName="Student";
+}
+
+document
+.getElementById("dialog-start")
+.close();
+
+nextQuestion();
+}
+
+function selectLevel(level){
+
+gameLevel = level;
+
+document
+.getElementById("level1Btn")
+.classList.remove("is-primary");
+
+document
+.getElementById("level2Btn")
+.classList.remove("is-primary");
+
+if(level===1){
+
+document
+.getElementById("level1Btn")
+.classList.add("is-primary");
+
+document
+.getElementById("levelDescription")
+.innerText =
+"LEVEL 1:\nMAJOR & MINOR CHORDS";
+
+}
+else{
+
+document
+.getElementById("level2Btn")
+.classList.add("is-primary");
+
+document
+.getElementById("levelDescription")
+.innerText =
+"LEVEL 2:\nDIMINISHED, AUGMENTED,\n7TH, MAJOR 7TH,\nMINOR 7TH CHORDS";
+
+}
+
+}
+
+function nextQuestion(){
+
+if(chordQueue.length===0){
+
+let activePool =
+gameLevel == 1
+? level1Chords
+: [...level1Chords,...level2Chords];
+
+chordQueue=[...activePool];
+
+shuffle(chordQueue);
+}
+
+currentChord =
+chordQueue.pop();
+
+document
+.getElementById("chordText")
+.innerText =
+currentChord.name;
+
+clearSelectedNotes();
+}
+
+function toggleNote(btn,note){
+
+if(selectedNotes.includes(note)){
+
+selectedNotes =
+selectedNotes.filter(
+n=>n!==note
+);
+
+btn.classList.remove("is-success");
+}
+else{
+
+selectedNotes.push(note);
+
+btn.classList.add("is-success");
+}
+}
+
+function clearSelectedNotes(){
+
+selectedNotes=[];
+
+document
+.querySelectorAll(".note-btn")
+.forEach(btn=>{
+btn.classList.remove("is-success");
+});
+}
+
+function showPopup(text,type){
+
+let p=document.getElementById("popup");
+let m=document.getElementById("popupMessage");
+
+p.classList.remove("is-hidden");
+
+m.innerHTML=
+`<p class="nes-text ${type}" style="margin:0;white-space:pre-line;">${text}</p>`;
+
+setTimeout(()=>{
+p.classList.add("is-hidden");
+},2500);
+}
+
+function checkAnswer(){
+
+if(selectedNotes.length===0){
+
+showPopup(
+"SELECT NOTES",
+"is-warning"
+);
+
+return;
+
+}
+
+let expected =
+[...currentChord.notes].sort();
+
+let actual =
+[...selectedNotes].sort();
+
+let correct =
+JSON.stringify(expected)===
+JSON.stringify(actual);
+
+if(correct){
+
+score++;
+
+showPopup(
+"CORRECT CHORD",
+"is-success"
+);
+}
+else{
+
+lives--;
+
+showPopup(
+"WRONG\n\n" +
+currentChord.name +
+"\n\n" +
+currentChord.notes.join(" "),
+"is-error"
+);
+
+}
+
+updateLives();
+updateScore();
+
+if(lives<=0){
+triggerGameOver();
+return;
+}
+
+questionCount++;
+
+if(questionCount>=10){
+
+let percent =
+Math.round(
+(score/10)*100
+);
+
+document
+.getElementById("finalScore")
+.innerText =
+studentName +
+" • SCORE: " +
+score +
+"/10 (" +
+percent +
+"%)";
+
+document
+.getElementById("winMessage")
+.innerText =
+studentName +
+", YOU HAVE MASTERED CHORD CONSTRUCTION!";
+
+let grade="";
+
+if(percent>=90){
+grade="A";
+}
+else if(percent>=80){
+grade="B";
+}
+else if(percent>=70){
+grade="C";
+}
+else if(percent>=60){
+grade="D";
+}
+else{
+grade="F";
+}
+
+document
+.getElementById("finalBreakdown")
+.innerText =
+"GRADE: " + grade;
+
+triggerWin();
+
+return;
+}
+
+nextQuestion();
+}
+
+function updateLives(){
+
+for(let i=1;i<=5;i++){
+
+document
+.getElementById("h"+i)
+.classList.toggle(
+"is-empty",
+i>lives
+);
+
+}
+
+}
+
+function updateScore(){
+
+for(let i=1;i<=10;i++){
+
+document
+.getElementById("t"+i)
+.classList.toggle(
+"is-empty",
+i>score
+);
+
+}
+
+}
+
+function triggerGameOver(){
+
+document
+.getElementById("gameOverMessage")
+.innerText =
+studentName +
+", YOU RAN OUT OF LIVES.";
+
+document
+.getElementById("dialog-game-over")
+.showModal();
+
+}
+
+function triggerWin(){
+
+document
+.getElementById("dialog-win")
+.showModal();
+
+}
+
+function restartGame(){
+
+document
+.getElementById("dialog-win")
+.close();
+
+document
+.getElementById("dialog-game-over")
+.close();
+
+manualReset();
+
+}
+
+function manualReset(){
+
+score=0;
+lives=5;
+questionCount=0;
+studentName="Student";
+
+chordQueue=[];
+
+clearSelectedNotes();
+
+for(let i=1;i<=10;i++){
+
+document
+.getElementById("t"+i)
+.classList.add("is-empty");
+
+}
+
+updateLives();
+updateScore();
+
+selectLevel(1);
+
+document
+.getElementById("dialog-start")
+.showModal();
+
+}
+
+updateLives();
+updateScore();
+
+document
+.getElementById("dialog-start")
+.showModal();
+</script>
+
+<footer
+class="nes-container is-dark"
+style="margin-top:40px;text-align:center;">
+
+<p>
+Sonic Arts Arcade • Powered by NES.css
+</p>
+
+</footer>
+
+</body>
+</html>
+#popup{
+margin-top:15px;
+}
+
+</style>
+
+</head>
+
+<body class="nes-body">
+
+<h2 class="nes-text is-primary">
+CHORD FORGE
+</h2>
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+SYSTEM HUD
+</p>
+
+<p>LIVES</p>
+
+<section>
+<i id="h1" class="nes-icon heart"></i>
+<i id="h2" class="nes-icon heart"></i>
+<i id="h3" class="nes-icon heart"></i>
+<i id="h4" class="nes-icon heart"></i>
+<i id="h5" class="nes-icon heart"></i>
+</section>
+
+<p>SCORE</p>
+
+<section>
+<i id="t1" class="nes-icon trophy is-empty"></i>
+<i id="t2" class="nes-icon trophy is-empty"></i>
+<i id="t3" class="nes-icon trophy is-empty"></i>
+<i id="t4" class="nes-icon trophy is-empty"></i>
+<i id="t5" class="nes-icon trophy is-empty"></i>
+<i id="t6" class="nes-icon trophy is-empty"></i>
+<i id="t7" class="nes-icon trophy is-empty"></i>
+<i id="t8" class="nes-icon trophy is-empty"></i>
+<i id="t9" class="nes-icon trophy is-empty"></i>
+<i id="t10" class="nes-icon trophy is-empty"></i>
+</section>
+
+<div class="button-row">
+
+<button
+class="nes-btn is-primary"
+onclick="checkAnswer()">
+CHECK CHORD
+</button>
+
+<button
+class="nes-btn is-error"
+onclick="manualReset()">
+RESET
+</button>
+
+</div>
+
+<div id="popup" class="is-hidden">
+
+<div id="popupMessage"
+class="nes-balloon from-left">
+</div>
+
+</div>
+
+</div>
+
+<!-- WELCOME -->
+
+<dialog id="dialog-start"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title" style="text-align:center;">
+WELCOME
+</p>
+
+<p style="text-align:center;">
+ENTER YOUR NAME
+</p>
+
+<input
+id="studentName"
+class="nes-input"
+type="text"
+placeholder="Your Name">
+
+<p style="text-align:center;">
+SELECT LEVEL
+</p>
+
+<div class="button-row"
+style="justify-content:center;">
+
+<button
+type="button"
+id="level1Btn"
+class="nes-btn is-primary"
+onclick="selectLevel(1)">
+LEVEL 1
+</button>
+
+<button
+type="button"
+id="level2Btn"
+class="nes-btn"
+onclick="selectLevel(2)">
+LEVEL 2
+</button>
+
+</div>
+
 <menu class="dialog-menu"
 style="text-align:center;">
 
