@@ -150,6 +150,14 @@ onclick="selectLevel(2)">
 LEVEL 2
 </button>
 
+<button
+type="button"
+id="level3Btn"
+class="nes-btn"
+onclick="selectLevel(3)">
+LEVEL 3
+</button>
+
 </div>
 
 <p
@@ -351,6 +359,10 @@ const level2Chords = [
 {name:"A Augmented",notes:["A","C#","F"]},
 {name:"B Augmented",notes:["B","D#","G"]},
 
+];
+
+const level3Chords = [
+
 {name:"C7",notes:["C","E","G","Bb"]},
 {name:"D7",notes:["D","F#","A","C"]},
 {name:"E7",notes:["E","G#","B","D"]},
@@ -413,6 +425,10 @@ document
 .getElementById("level2Btn")
 .classList.remove("is-primary");
 
+document
+.getElementById("level3Btn")
+.classList.remove("is-primary");
+
 if(level===1){
 
 document
@@ -425,7 +441,8 @@ document
 "LEVEL 1:\nMAJOR & MINOR CHORDS";
 
 }
-else{
+
+else if(level===2){
 
 document
 .getElementById("level2Btn")
@@ -434,7 +451,20 @@ document
 document
 .getElementById("levelDescription")
 .innerText =
-"LEVEL 2:\nDIMINISHED, AUGMENTED,\n7TH, MAJOR 7TH,\nMINOR 7TH CHORDS";
+"LEVEL 2:\nDIMINISHED & AUGMENTED CHORDS";
+
+}
+
+else{
+
+document
+.getElementById("level3Btn")
+.classList.add("is-primary");
+
+document
+.getElementById("levelDescription")
+.innerText =
+"LEVEL 3:\nDOMINANT 7\nMAJOR 7\nMINOR 7 CHORDS";
 
 }
 
@@ -444,10 +474,23 @@ function nextQuestion(){
 
 if(chordQueue.length===0){
 
-let activePool =
-gameLevel == 1
-? level1Chords
-: [...level1Chords,...level2Chords];
+let activePool;
+
+if(gameLevel===1){
+
+activePool = level1Chords;
+
+}
+else if(gameLevel===2){
+
+activePool = level2Chords;
+
+}
+else{
+
+activePool = level3Chords;
+
+}
 
 chordQueue=[...activePool];
 
@@ -549,7 +592,7 @@ lives--;
 showPopup(
 "WRONG\n\n" +
 currentChord.name +
-"\n\n" +
+" = " +
 currentChord.notes.join(" "),
 "is-error"
 );
