@@ -1,6 +1,6 @@
 # Sonic Arts Arcade
 
-Interactive educational games and studio training tools designed for students of the Sonic Arts Center. These browser-based learning experiences reinforce recording, signal flow, microphone technique, and studio workflow concepts through hands-on, game-based training.
+Interactive educational games and studio training tools designed for students of the Sonic Arts Center. These browser-based learning experiences reinforce recording, signal flow, music theory, microphone technique, and studio workflow concepts through hands-on, game-based training.
 
 ## Current Games
 
@@ -13,6 +13,27 @@ Identify microphone characteristics and studio requirements, including phantom p
 ### ⚡ Level Trainer
 Master the four fundamental audio signal levels: Mic, Instrument, Line, and Speaker Level. Analyze real-world studio scenarios featuring microphones, guitars, basses, DI boxes, preamps, consoles, amplifiers, and processors to identify the signal level present at each stage of the audio path.
 
+### 🎼 Scale Quest
+Develop practical music theory skills by constructing major and natural minor scales from a given root note. Students must identify the correct notes that belong to each scale while reinforcing key signatures, intervals, accidentals, and scale-building concepts through randomized challenges.
+
+### 🎹 Chord Forge
+Learn chord construction by building chords from individual notes. Players select the notes that belong to a presented chord while progressing through two difficulty levels:
+
+**Level 1**
+- Major Chords
+- Minor Chords
+
+**Level 2**
+- Major Chords
+- Minor Chords
+- Diminished Chords
+- Augmented Chords
+- Dominant 7th Chords
+- Major 7th Chords
+- Minor 7th Chords
+
+Randomized challenges, lives, trophies, and final grades help reinforce harmonic understanding and chord recognition through active learning.
+
 ## Learning Objectives
 
 Students will develop proficiency in:
@@ -23,6 +44,9 @@ Students will develop proficiency in:
 - Phantom power and gain staging concepts
 - Analog and digital recording workflows
 - Audio signal level identification
+- Scale construction
+- Chord construction
+- Basic music theory and harmony
 - Studio troubleshooting and critical thinking
 
 ## Credits
