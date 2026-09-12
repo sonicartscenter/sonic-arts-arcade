@@ -13,9 +13,6 @@ Identify microphone characteristics and studio requirements, including phantom p
 ### ⚡ Level Trainer
 Master the four fundamental audio signal levels: Mic, Instrument, Line, and Speaker Level. Analyze real-world studio scenarios featuring microphones, guitars, basses, DI boxes, preamps, consoles, amplifiers, and processors to identify the signal level present at each stage of the audio path.
 
-### 🎼 Scale Quest
-Develop practical music theory skills by constructing major and natural minor scales from a given root note. Students must identify the correct notes that belong to each scale while reinforcing key signatures, intervals, accidentals, and scale-building concepts through randomized challenges.
-
 ### 🎹 Chord Forge
 Learn chord construction by building chords from individual notes. Players select the notes that belong to a presented chord while progressing through two difficulty levels:
 
