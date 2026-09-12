@@ -512,38 +512,56 @@ function playNote(note){
 
 const fileMap = {
 
-"C":"Audio/C.wav",
+"C":"Audio/C.mp3",
 
-"C#":"Audio/Csharp.wav",
-"Db":"Audio/Csharp.wav",
+"C#":"Audio/Csharp.mp3",
+"Db":"Audio/Csharp.mp3",
 
-"D":"Audio/D.wav",
+"D":"Audio/D.mp3",
 
-"D#":"Audio/Dsharp.wav",
-"Eb":"Audio/Dsharp.wav",
+"D#":"Audio/Dsharp.mp3",
+"Eb":"Audio/Dsharp.mp3",
 
-"E":"Audio/E.wav",
+"E":"Audio/E.mp3",
 
-"F":"Audio/F.wav",
+"F":"Audio/F.mp3",
 
-"F#":"Audio/Fsharp.wav",
-"Gb":"Audio/Fsharp.wav",
+"F#":"Audio/Fsharp.mp3",
+"Gb":"Audio/Fsharp.mp3",
 
-"G":"Audio/G.wav",
+"G":"Audio/G.mp3",
 
-"G#":"Audio/Gsharp.wav",
-"Ab":"Audio/Gsharp.wav",
+"G#":"Audio/Gsharp.mp3",
+"Ab":"Audio/Gsharp.mp3",
 
-"A":"Audio/A.wav",
+"A":"Audio/A.mp3",
 
-"A#":"Audio/Asharp.wav",
-"Bb":"Audio/Asharp.wav",
+"A#":"Audio/Asharp.mp3",
+"Bb":"Audio/Asharp.mp3",
 
-"B":"Audio/B.wav"
+"B":"Audio/B.mp3"
 
 };
 
-new Audio(fileMap[note]).play();
+let sound = new Audio(fileMap[note]);
+
+sound.currentTime = 0;
+
+sound.play();
+
+}
+
+function playChord(notes){
+
+notes.forEach((note,index)=>{
+
+setTimeout(()=>{
+
+playNote(note);
+
+},index * 300);
+
+});
 
 }
 
@@ -621,11 +639,15 @@ if(correct){
 
 score++;
 
+playChord(currentChord.notes);
+
 showPopup(
 "CORRECT CHORD",
 "is-success"
 );
+
 }
+
 else{
 
 lives--;
