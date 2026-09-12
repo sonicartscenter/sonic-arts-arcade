@@ -492,7 +492,13 @@ document
 buildAnswerButtons();
 
 selectedAnswer = null;
+
+document
+.getElementById("popup")
+.classList.add("is-hidden");
+
 playChord(currentChord.notes);
+
 }
 
 function buildAnswerButtons(){
@@ -661,8 +667,6 @@ currentChord.quality;
 if(correct){
 
 score++;
-
-playChord(currentChord.notes);
 
 showPopup(
 "CORRECT CHORD",
