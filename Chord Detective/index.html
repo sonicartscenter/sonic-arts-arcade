@@ -493,11 +493,18 @@ buildAnswerButtons();
 
 selectedAnswer = null;
 
+setTimeout(()=>{
+document
+.getElementById("popupMessage")
+.innerHTML = "";
+
 document
 .getElementById("popup")
 .classList.add("is-hidden");
 
 playChord(currentChord.notes);
+
+},1100);
 
 }
 
@@ -679,8 +686,6 @@ else{
 
 lives--;
 
-playChord(currentChord.notes);
-
 showPopup(
 "WRONG\n\n" +
 currentChord.name +
@@ -752,7 +757,11 @@ triggerWin();
 return;
 }
 
+setTimeout(()=>{
+
 nextQuestion();
+
+},900);
 }
 
 function updateLives(){
