@@ -20,19 +20,38 @@ Develop practical music theory skills by constructing major and natural minor sc
 Learn chord construction by building chords from individual notes. Players select the notes that belong to a presented chord while progressing through two difficulty levels:
 
 **Level 1**
-- Major Chords
-- Minor Chords
+Major Chords
+Minor Chords
 
 **Level 2**
-- Major Chords
-- Minor Chords
-- Diminished Chords
-- Augmented Chords
-- Dominant 7th Chords
-- Major 7th Chords
-- Minor 7th Chords
+Diminished Chords
+Augmented Chords
+
+**Level 3**
+Dominant 7th Chords
+Major 7th Chords
+Minor 7th Chords
 
 Randomized challenges, lives, trophies, and final grades help reinforce harmonic understanding and chord recognition through active learning.
+
+### 🎹 Chord Detective
+
+Train your ears and strengthen your harmonic recognition skills through active listening challenges. Chord Detective plays a chord and asks students to identify its quality by ear using progressively more advanced levels of difficulty.
+
+**Level 1**
+Major Chords
+Minor Chords
+
+**Level 2**
+Diminished Chords
+Augmented Chords
+
+**Level 3**
+Dominant 7th Chords
+Major 7th Chords
+Minor 7th Chords
+
+Players can replay each chord as many times as needed before submitting an answer. With randomized listening exercises, a lives-and-trophies arcade system, and final grading, Chord Detective reinforces critical listening, chord recognition, and ear-training skills essential for musicians, producers, and audio engineers. 🎹🎧🏆
 
 ## Learning Objectives
 
