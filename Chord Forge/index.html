@@ -357,7 +357,7 @@ const level2Chords = [
 {name:"F Augmented",notes:["F","A","C#"]},
 {name:"G Augmented",notes:["G","B","D#"]},
 {name:"A Augmented",notes:["A","C#","F"]},
-{name:"B Augmented",notes:["B","D#","G"]},
+{name:"B Augmented",notes:["B","D#","G"]}
 
 ];
 
@@ -513,33 +513,39 @@ function playNote(note){
 const fileMap = {
 
 "C":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/C.mp3",
-
 "C#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp.mp3",
 "Db":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp.mp3",
-
 "D":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/D.mp3",
-
 "D#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp.mp3",
 "Eb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp.mp3",
-
 "E":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/E.mp3",
-
 "F":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/F.mp3",
-
 "F#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp.mp3",
 "Gb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp.mp3",
-
 "G":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/G.mp3",
-
 "G#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp.mp3",
 "Ab":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp.mp3",
-
 "A":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/A.mp3",
-
 "A#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp.mp3",
 "Bb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp.mp3",
-
-"B":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/B.mp3"
+"B":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/B.mp3",
+"C1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/C1.mp3",
+"C#1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp1.mp3",
+"Db1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp1.mp3",
+"D1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/D1.mp3",
+"D#1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp1.mp3",
+"Eb1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp1.mp3",
+"E1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/E1.mp3",
+"F1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/F1.mp3",
+"F#1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp1.mp3",
+"Gb1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp1.mp3",
+"G1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/G1.mp3",
+"G#1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp1.mp3",
+"Ab1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp1.mp3",
+"A1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/A1.mp3",
+"A#1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp1.mp3",
+"Bb1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp1.mp3",
+"B1":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/B1.mp3"
 
 };
 
@@ -551,9 +557,46 @@ sound.play();
 
 }
 
+function getPlayableNotes(notes){
+
+const map = {
+
+"A,C,E": ["A","C1","E1"],
+"A,C#,E": ["A","C#1","E1"],
+"Bb,Db,F": ["Bb","Db1","F1"],
+"Bb,D,F": ["Bb","D1","F1"],
+"B,D,F#": ["B","D1","F#1"],
+"B,D#,F#": ["B","D#1","F#1"],
+"C,E,G": ["C","E","G"],
+"Db,F,Ab": ["Db","F","Ab"],
+"D,F,A": ["D","F","A"],
+"D,F#,A": ["D","F#","A"],
+"Eb,G,Bb": ["Eb","G","Bb"],
+"Eb,Gb,Bb": ["Eb","Gb","Bb"],
+"E,G,B": ["E","G","B"],
+"E,G#,B": ["E","G#","B"],
+"F,A,C": ["F","A","C1"],
+"F,Ab,C": ["F","Ab","C1"],
+"F#,A,C#": ["F#","A","C#1"],
+"G,B,D": ["G","B","D1"],
+"G,Bb,D": ["G","Bb","D1"],
+"G#,B,D#": ["G#","B","D#1"],
+"Ab,C,Eb": ["Ab","C1","Eb1"]
+
+};
+
+let key = notes.join(",");
+
+return map[key] || notes;
+
+}
+
 function playChord(notes){
 
-notes.forEach((note,index)=>{
+let playableNotes =
+getPlayableNotes(notes);
+
+playableNotes.forEach((note,index)=>{
 
 setTimeout(()=>{
 
