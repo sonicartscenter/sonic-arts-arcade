@@ -510,9 +510,42 @@ clearSelectedNotes();
 
 function playNote(note){
 
-let sound = new Audio(
-"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/C.mp3"
-);
+const fileMap = {
+
+"C":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/C.mp3",
+
+"C#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp.mp3",
+"Db":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp.mp3",
+
+"D":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/D.mp3",
+
+"D#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp.mp3",
+"Eb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp.mp3",
+
+"E":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/E.mp3",
+
+"F":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/F.mp3",
+
+"F#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp.mp3",
+"Gb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp.mp3",
+
+"G":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/G.mp3",
+
+"G#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp.mp3",
+"Ab":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp.mp3",
+
+"A":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/A.mp3",
+
+"A#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp.mp3",
+"Bb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp.mp3",
+
+"B":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/B.mp3"
+
+};
+
+let sound = new Audio(fileMap[note]);
+
+sound.currentTime = 0;
 
 sound.play();
 
