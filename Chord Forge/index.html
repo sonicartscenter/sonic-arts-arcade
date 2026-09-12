@@ -508,7 +508,48 @@ currentChord.name;
 clearSelectedNotes();
 }
 
+function playNote(note){
+
+const fileMap = {
+
+"C":"Audio/C.wav",
+
+"C#":"Audio/Csharp.wav",
+"Db":"Audio/Csharp.wav",
+
+"D":"Audio/D.wav",
+
+"D#":"Audio/Dsharp.wav",
+"Eb":"Audio/Dsharp.wav",
+
+"E":"Audio/E.wav",
+
+"F":"Audio/F.wav",
+
+"F#":"Audio/Fsharp.wav",
+"Gb":"Audio/Fsharp.wav",
+
+"G":"Audio/G.wav",
+
+"G#":"Audio/Gsharp.wav",
+"Ab":"Audio/Gsharp.wav",
+
+"A":"Audio/A.wav",
+
+"A#":"Audio/Asharp.wav",
+"Bb":"Audio/Asharp.wav",
+
+"B":"Audio/B.wav"
+
+};
+
+new Audio(fileMap[note]).play();
+
+}
+
 function toggleNote(btn,note){
+
+playNote(note);
 
 if(selectedNotes.includes(note)){
 
