@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Press Start 2P';
+}
+
+.full-row{
+width:100%;
+margin-bottom:15px;
+}
+
+.button-row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.heart.is-empty,
+.trophy.is-empty{
+color:transparent;
+}
+
+p{
+margin-top:20px;
+}
+
+#popup{
+margin-top:15px;
+}
+
+</style>
+
+</head>
+
+<body class="nes-body">
+
+<h2 class="nes-text is-primary">
+CHORD DETECTIVE
+</h2>
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+SYSTEM HUD
+</p>
+
+<p>LIVES</p>
+
+<section>
+<i id="h1" class="nes-icon heart"></i>
+<i id="h2" class="nes-icon heart"></i>
+<i id="h3" class="nes-icon heart"></i>
+<i id="h4" class="nes-icon heart"></i>
+<i id="h5" class="nes-icon heart"></i>
+</section>
+
+<p>SCORE</p>
+
+<section>
+<i id="t1" class="nes-icon trophy is-empty"></i>
+<i id="t2" class="nes-icon trophy is-empty"></i>
+<i id="t3" class="nes-icon trophy is-empty"></i>
+<i id="t4" class="nes-icon trophy is-empty"></i>
+<i id="t5" class="nes-icon trophy is-empty"></i>
+<i id="t6" class="nes-icon trophy is-empty"></i>
+<i id="t7" class="nes-icon trophy is-empty"></i>
+<i id="t8" class="nes-icon trophy is-empty"></i>
+<i id="t9" class="nes-icon trophy is-empty"></i>
+<i id="t10" class="nes-icon trophy is-empty"></i>
+</section>
+
+<div class="button-row">
+
+<button
+class="nes-btn is-primary"
+onclick="checkAnswer()">
+CHECK ANSWER
+</button>
+
+<button
+class="nes-btn is-error"
+onclick="manualReset()">
+RESET
+</button>
+
+</div>
+
+<div id="popup" class="is-hidden">
+
+<div id="popupMessage"
+class="nes-balloon from-left">
+</div>
+
+</div>
+
+</div>
+
+<!-- WELCOME -->
+
+<dialog id="dialog-start"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title" style="text-align:center;">
+WELCOME
+</p>
+
+<p style="text-align:center;">
+ENTER YOUR NAME
+</p>
+
+<input
+id="studentName"
+class="nes-input"
+type="text"
+placeholder="Your Name">
+
+<p style="text-align:center;">
+SELECT LEVEL
+</p>
+
+<div class="button-row"
+style="justify-content:center;">
+
+<button
+type="button"
+id="level1Btn"
+class="nes-btn is-primary"
+onclick="selectLevel(1)">
+LEVEL 1
+</button>
+
+<button
+type="button"
+id="level2Btn"
+class="nes-btn"
+onclick="selectLevel(2)">
+LEVEL 2
+</button>
+
+<button
+type="button"
+id="level3Btn"
+class="nes-btn"
+onclick="selectLevel(3)">
+LEVEL 3
+</button>
+
+</div>
+
+<p
+id="levelDescription"
+style="margin-top:20px;text-align:center;">
+LEVEL 1:
+MAJOR & MINOR CHORDS
+</p>
+
+<menu class="dialog-menu"
+style="text-align:center;">
+
+<button
+class="nes-btn is-error"
+onclick="startGame()">
+START
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<!-- GAME OVER -->
+
+<dialog id="dialog-game-over"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title">GAME OVER</p>
+
+<p id="gameOverMessage"></p>
+
+<menu class="dialog-menu">
+
+<button
+class="nes-btn is-primary"
+onclick="restartGame()">
+TRY AGAIN
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<!-- WIN -->
+
+<dialog id="dialog-win"
+class="nes-dialog is-dark is-rounded">
+
+<form method="dialog">
+
+<p class="title">
+CONGRATULATIONS!
+</p>
+
+<p id="winMessage"></p>
+
+<p>
+YOU'VE COMPLETED CHORD DETECTIVE
+</p>
+
+<p id="finalScore"
+class="nes-text is-success">
+</p>
+
+<p id="finalBreakdown"></p>
+
+<menu class="dialog-menu">
+
+<button
+class="nes-btn is-success"
+onclick="restartGame()">
+START AGAIN
+</button>
+
+</menu>
+
+</form>
+
+</dialog>
+
+<!-- ASSIGNMENT -->
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+IDENTIFY THE CHORD
+</p>
+
+<p id="chordText">
+Loading...
+</p>
+
+<button
+class="nes-btn is-primary"
+onclick="playChord(currentChord.notes)">
+PLAY AGAIN
+</button>
+
+</div>
+
+<!-- ANSWER BUTTONS -->
+
+<div class="nes-container is-dark with-title full-row">
+
+<p class="title">
+SELECT ANSWER
+</p>
+
+<div
+id="answerButtons"
+class="button-row">
+
+</div>
+
+</div>
+
+<script>
+
+let score = 0;
+let lives = 5;
+let questionCount = 0;
+let studentName = "Student";
+
+let gameLevel = 1;
+
+let selectedAnswer = null;
+
+let chordQueue = [];
+
+let currentChord = null;
+
+const level1Chords = [
+
+{name:"C Major",quality:"Major",notes:["C","E","G"]},
+{name:"Db Major",quality:"Major",notes:["Db","F","Ab"]},
+{name:"D Major",quality:"Major",notes:["D","F#","A"]},
+{name:"Eb Major",quality:"Major",notes:["Eb","G","Bb"]},
+{name:"E Major",quality:"Major",notes:["E","G#","B"]},
+{name:"F Major",quality:"Major",notes:["F","A","C"]},
+{name:"Gb Major",quality:"Major",notes:["Gb","Bb","Db"]},
+{name:"G Major",quality:"Major",notes:["G","B","D"]},
+{name:"Ab Major",quality:"Major",notes:["Ab","C","Eb"]},
+{name:"A Major",quality:"Major",notes:["A","C#","E"]},
+{name:"Bb Major",quality:"Major",notes:["Bb","D","F"]},
+{name:"B Major",quality:"Major",notes:["B","D#","F#"]},
+
+{name:"C Minor",quality:"Minor",notes:["C","Eb","G"]},
+{name:"C# Minor",quality:"Minor",notes:["C#","E","G#"]},
+{name:"D Minor",quality:"Minor",notes:["D","F","A"]},
+{name:"Eb Minor",quality:"Minor",notes:["Eb","Gb","Bb"]},
+{name:"E Minor",quality:"Minor",notes:["E","G","B"]},
+{name:"F Minor",quality:"Minor",notes:["F","Ab","C"]},
+{name:"F# Minor",quality:"Minor",notes:["F#","A","C#"]},
+{name:"G Minor",quality:"Minor",notes:["G","Bb","D"]},
+{name:"G# Minor",quality:"Minor",notes:["G#","B","D#"]},
+{name:"A Minor",quality:"Minor",notes:["A","C","E"]},
+{name:"Bb Minor",quality:"Minor",notes:["Bb","Db","F"]},
+{name:"B Minor",quality:"Minor",notes:["B","D","F#"]}
+
+];
+
+const level2Chords = [
+
+{name:"C Diminished",quality:"Diminished",notes:["C","Eb","Gb"]},
+{name:"D Diminished",quality:"Diminished",notes:["D","F","Ab"]},
+{name:"E Diminished",quality:"Diminished",notes:["E","G","Bb"]},
+{name:"F Diminished",quality:"Diminished",notes:["F","Ab","B"]},
+{name:"G Diminished",quality:"Diminished",notes:["G","Bb","Db"]},
+{name:"A Diminished",quality:"Diminished",notes:["A","C","Eb"]},
+{name:"B Diminished",quality:"Diminished",notes:["B","D","F"]},
+
+{name:"C Augmented",quality:"Augmented",notes:["C","E","G#"]},
+{name:"D Augmented",quality:"Augmented",notes:["D","F#","A#"]},
+{name:"E Augmented",quality:"Augmented",notes:["E","G#","C"]},
+{name:"F Augmented",quality:"Augmented",notes:["F","A","C#"]},
+{name:"G Augmented",quality:"Augmented",notes:["G","B","D#"]},
+{name:"A Augmented",quality:"Augmented",notes:["A","C#","F"]},
+{name:"B Augmented",quality:"Augmented",notes:["B","D#","G"]}
+
+];
+
+const level3Chords = [
+
+{name:"C7",quality:"Dominant 7",notes:["C","E","G","Bb"]},
+{name:"D7",quality:"Dominant 7",notes:["D","F#","A","C"]},
+{name:"E7",quality:"Dominant 7",notes:["E","G#","B","D"]},
+{name:"F7",quality:"Dominant 7",notes:["F","A","C","Eb"]},
+{name:"G7",quality:"Dominant 7",notes:["G","B","D","F"]},
+{name:"A7",quality:"Dominant 7",notes:["A","C#","E","G"]},
+{name:"B7",quality:"Dominant 7",notes:["B","D#","F#","A"]},
+
+{name:"Cmaj7",quality:"Major 7",notes:["C","E","G","B"]},
+{name:"Dmaj7",quality:"Major 7",notes:["D","F#","A","C#"]},
+{name:"Emaj7",quality:"Major 7",notes:["E","G#","B","D#"]},
+{name:"Fmaj7",quality:"Major 7",notes:["F","A","C","E"]},
+{name:"Gmaj7",quality:"Major 7",notes:["G","B","D","F#"]},
+{name:"Amaj7",quality:"Major 7",notes:["A","C#","E","G#"]},
+{name:"Bmaj7",quality:"Major 7",notes:["B","D#","F#","A#"]},
+
+{name:"Cm7",quality:"Minor 7",notes:["C","Eb","G","Bb"]},
+{name:"Dm7",quality:"Minor 7",notes:["D","F","A","C"]},
+{name:"Em7",quality:"Minor 7",notes:["E","G","B","D"]},
+{name:"Fm7",quality:"Minor 7",notes:["F","Ab","C","Eb"]},
+{name:"Gm7",quality:"Minor 7",notes:["G","Bb","D","F"]},
+{name:"Am7",quality:"Minor 7",notes:["A","C","E","G"]},
+{name:"Bm7",quality:"Minor 7",notes:["B","D","F#","A"]}
+
+];
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+}
+
+function startGame(){
+
+studentName =
+document.getElementById("studentName")
+.value.trim();
+
+if(studentName===""){
+studentName="Student";
+}
+
+document
+.getElementById("dialog-start")
+.close();
+
+nextQuestion();
+}
+
+function selectLevel(level){
+
+gameLevel = level;
+
+document
+.getElementById("level1Btn")
+.classList.remove("is-primary");
+
+document
+.getElementById("level2Btn")
+.classList.remove("is-primary");
+
+document
+.getElementById("level3Btn")
+.classList.remove("is-primary");
+
+if(level===1){
+
+document
+.getElementById("level1Btn")
+.classList.add("is-primary");
+
+document
+.getElementById("levelDescription")
+.innerText =
+"LEVEL 1:\nMAJOR & MINOR CHORDS";
+
+}
+
+else if(level===2){
+
+document
+.getElementById("level2Btn")
+.classList.add("is-primary");
+
+document
+.getElementById("levelDescription")
+.innerText =
+"LEVEL 2:\nDIMINISHED & AUGMENTED CHORDS";
+
+}
+
+else{
+
+document
+.getElementById("level3Btn")
+.classList.add("is-primary");
+
+document
+.getElementById("levelDescription")
+.innerText =
+"LEVEL 3:\nDOMINANT 7\nMAJOR 7\nMINOR 7 CHORDS";
+
+}
+
+}
+
+function nextQuestion(){
+
+if(chordQueue.length===0){
+
+let activePool;
+
+if(gameLevel===1){
+
+activePool = level1Chords;
+
+}
+else if(gameLevel===2){
+
+activePool = level2Chords;
+
+}
+else{
+
+activePool = level3Chords;
+
+}
+
+chordQueue=[...activePool];
+
+shuffle(chordQueue);
+}
+
+currentChord =
+chordQueue.pop();
+
+document
+.getElementById("chordText")
+.innerText =
+"LISTEN...";
+
+buildAnswerButtons();
+
+selectedAnswer = null;
+playChord(currentChord.notes);
+}
+
+function buildAnswerButtons(){
+
+let container =
+document.getElementById(
+"answerButtons"
+);
+
+container.innerHTML = "";
+
+let answers = [];
+
+if(gameLevel===1){
+
+answers = [
+"Major",
+"Minor"
+];
+
+}
+else if(gameLevel===2){
+
+answers = [
+"Diminished",
+"Augmented"
+];
+
+}
+else{
+
+answers = [
+"Dominant 7",
+"Major 7",
+"Minor 7"
+];
+
+}
+
+answers.forEach(answer=>{
+
+let btn =
+document.createElement("button");
+
+btn.className =
+"nes-btn";
+
+btn.innerText =
+answer;
+
+btn.onclick =
+()=>selectAnswer(
+answer,
+btn
+);
+
+container.appendChild(
+btn
+);
+
+});
+
+}
+
+function selectAnswer(answer,btn){
+
+selectedAnswer =
+answer;
+
+document
+.querySelectorAll(
+"#answerButtons .nes-btn"
+)
+.forEach(button=>{
+
+button.classList.remove(
+"is-primary"
+);
+
+});
+
+btn.classList.add(
+"is-primary"
+);
+
+}
+
+function playNote(note){
+
+const fileMap = {
+
+"C":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/C.mp3",
+"C#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp.mp3",
+"Db":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Csharp.mp3",
+"D":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/D.mp3",
+"D#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp.mp3",
+"Eb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Dsharp.mp3",
+"E":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/E.mp3",
+"F":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/F.mp3",
+"F#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp.mp3",
+"Gb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Fsharp.mp3",
+"G":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/G.mp3",
+"G#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp.mp3",
+"Ab":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Gsharp.mp3",
+"A":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/A.mp3",
+"A#":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp.mp3",
+"Bb":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/Asharp.mp3",
+"B":"https://sonicartscenter.github.io/sonic-arts-arcade/Audio/B.mp3"
+
+};
+
+let sound = new Audio(fileMap[note]);
+
+sound.currentTime = 0;
+
+sound.play();
+
+}
+
+function playChord(notes){
+
+notes.forEach((note,index)=>{
+
+setTimeout(()=>{
+
+playNote(note);
+
+},index * 300);
+
+});
+
+}
+
+function showPopup(text,type){
+
+let p=document.getElementById("popup");
+let m=document.getElementById("popupMessage");
+
+p.classList.remove("is-hidden");
+
+m.innerHTML=
+`<p class="nes-text ${type}" style="margin:0;white-space:pre-line;">${text}</p>`;
+
+setTimeout(()=>{
+p.classList.add("is-hidden");
+},2500);
+}
+
+function checkAnswer(){
+
+if(selectedAnswer===null){
+
+showPopup(
+"SELECT AN ANSWER",
+"is-warning"
+);
+
+return;
+
+}
+
+let correct =
+selectedAnswer ===
+currentChord.quality;
+
+if(correct){
+
+score++;
+
+playChord(currentChord.notes);
+
+showPopup(
+"CORRECT CHORD",
+"is-success"
+);
+
+}
+
+else{
+
+lives--;
+
+playChord(currentChord.notes);
+
+showPopup(
+"WRONG\n\n" +
+currentChord.name +
+"\nQUALITY: " +
+currentChord.quality,
+"is-error"
+);
+
+}
+
+updateLives();
+updateScore();
+
+if(lives<=0){
+triggerGameOver();
+return;
+}
+
+questionCount++;
+
+if(questionCount>=10){
+
+let percent =
+Math.round(
+(score/10)*100
+);
+
+document
+.getElementById("finalScore")
+.innerText =
+studentName +
+" • SCORE: " +
+score +
+"/10 (" +
+percent +
+"%)";
+
+document
+.getElementById("winMessage")
+.innerText =
+studentName +
+", YOU HAVE MASTERED CHORD IDENTIFICATION!";
+
+let grade="";
+
+if(percent>=90){
+grade="A";
+}
+else if(percent>=80){
+grade="B";
+}
+else if(percent>=70){
+grade="C";
+}
+else if(percent>=60){
+grade="D";
+}
+else{
+grade="F";
+}
+
+document
+.getElementById("finalBreakdown")
+.innerText =
+"GRADE: " + grade;
+
+triggerWin();
+
+return;
+}
+
+nextQuestion();
+}
+
+function updateLives(){
+
+for(let i=1;i<=5;i++){
+
+document
+.getElementById("h"+i)
+.classList.toggle(
+"is-empty",
+i>lives
+);
+
+}
+
+}
+
+function updateScore(){
+
+for(let i=1;i<=10;i++){
+
+document
+.getElementById("t"+i)
+.classList.toggle(
+"is-empty",
+i>score
+);
+
+}
+
+}
+
+function triggerGameOver(){
+
+document
+.getElementById("gameOverMessage")
+.innerText =
+studentName +
+", YOU RAN OUT OF LIVES.";
+
+document
+.getElementById("dialog-game-over")
+.showModal();
+
+}
+
+function triggerWin(){
+
+document
+.getElementById("dialog-win")
+.showModal();
+
+}
+
+function restartGame(){
+
+document
+.getElementById("dialog-win")
+.close();
+
+document
+.getElementById("dialog-game-over")
+.close();
+
+manualReset();
+
+}
+
+function manualReset(){
+
+score=0;
+lives=5;
+questionCount=0;
+studentName="Student";
+
+chordQueue=[];
+
+selectedAnswer = null;
+
+for(let i=1;i<=10;i++){
+
+document
+.getElementById("t"+i)
+.classList.add("is-empty");
+
+}
+
+updateLives();
+updateScore();
+
+selectLevel(1);
+
+document
+.getElementById("dialog-start")
+.showModal();
+
+}
+
+updateLives();
+updateScore();
+
+selectLevel(1);
+
+document
+.getElementById("dialog-start")
+.showModal();
+</script>
+
+<footer
+class="nes-container is-dark"
+style="margin-top:40px;text-align:center;">
+
+<p>
+Sonic Arts Arcade • Powered by NES.css
+</p>
+
+</footer>
+
+</body>
+</html>
